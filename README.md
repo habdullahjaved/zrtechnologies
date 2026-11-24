@@ -14,8 +14,9 @@ The full brief is in [`ZR_TECHNOLOGIES_BUILD_PROMPT.md`](ZR_TECHNOLOGIES_BUILD_P
 |---|---|---|
 | 0 | Plan | Done |
 | 1 | Foundation: admin panel, roles, MFA, settings, design system, layout | Done |
-| 2 | Catalogue, pricing, coverage, price and postcode checkers | Next |
-| 3–5 | Booking & CRM, content & SEO, tracking & go-live | Planned |
+| 2 | Catalogue, pricing, coverage, price and postcode checkers | Done |
+| 3 | Booking wizard and core CRM | Next |
+| 4–5 | Content & SEO, tracking & go-live | Planned |
 
 ## Requirements
 
@@ -61,19 +62,25 @@ php artisan serve
 | Business details (NAP), opening hours, social links, SEO defaults | settings migrations in `database/settings` | all |
 | Staff roles and permissions | `RolesAndPermissionsSeeder` | all |
 | Owner's super admin account | `AdminUserSeeder` (from `ADMIN_*`) | all |
+| iPhone models (iPhone 8 to iPhone 18 Pro Max), 12 repair types, part qualities, **draft** price list | `CatalogueSeeder` | all (only creates what is missing) |
+| Draft service areas, weekly collection timetable, bank holidays | `CoverageSeeder` | all (only creates what is missing) |
 | One demo account per role (password `password`) | `DemoStaffSeeder` | local/testing only |
 
 Demo accounts: `manager@`, `technician@`, `content@`, `sales@zrtechnologies.test`.
+
+## Prices and coverage
+
+Every seeded price and service area is marked **DRAFT – confirm before launch**. In **Admin → Catalogue → Price list** you can edit prices inline, change a selection by a percentage, confirm drafts in bulk, and download or upload the whole list as CSV (Excel / Google Sheets). Postcode checks use [postcodes.io](https://postcodes.io) (free, no key), cached in the `postcode_lookups` table; if it is unreachable, the check falls back to the postcode district.
 
 ## Staff roles
 
 | Role | Access |
 |---|---|
 | Super Admin | Everything, including roles |
-| Manager | Staff (except super admins), all settings, audit log |
-| Marketing / Content | Website & SEO and social settings (blog, pages and SEO tools arrive in Phase 4) |
-| Technician | Repair jobs (Phase 3) |
-| Sales / Support | Leads and customers (Phase 3) |
+| Manager | Staff (except super admins), all settings, audit log, catalogue, prices and coverage |
+| Marketing / Content | Website & SEO and social settings; edits model and repair descriptions; views prices (blog, pages and SEO tools arrive in Phase 4) |
+| Technician | Views the price list; repair jobs arrive in Phase 3 |
+| Sales / Support | Views prices, service areas and collection times; leads and customers arrive in Phase 3 |
 
 Permissions are defined in `database/seeders/RolesAndPermissionsSeeder.php` and can be fine-tuned in **Admin → Users & security → Roles & permissions**.
 

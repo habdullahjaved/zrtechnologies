@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 use App\Filament\Resources\Activities\ActivityResource;
+use App\Filament\Resources\AvailabilityOverrides\AvailabilityOverrideResource;
+use App\Filament\Resources\AvailabilityWindows\AvailabilityWindowResource;
+use App\Filament\Resources\BlackoutDates\BlackoutDateResource;
+use App\Filament\Resources\DeviceModels\DeviceModelResource;
+use App\Filament\Resources\PartQualities\PartQualityResource;
+use App\Filament\Resources\RepairPrices\RepairPriceResource;
+use App\Filament\Resources\RepairTypes\RepairTypeResource;
+use App\Filament\Resources\ServiceAreas\ServiceAreaResource;
+use App\Filament\Resources\ServiceCategories\ServiceCategoryResource;
 use App\Filament\Resources\Users\UserResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
@@ -190,6 +199,15 @@ return [
         'manage' => [
             UserResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
             ActivityResource::class => ['viewAny', 'view'],
+            AvailabilityOverrideResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            AvailabilityWindowResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            BlackoutDateResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            DeviceModelResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            PartQualityResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            RepairPriceResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            RepairTypeResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            ServiceAreaResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            ServiceCategoryResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
             RoleResource::class => [
                 'viewAny',
                 'view',

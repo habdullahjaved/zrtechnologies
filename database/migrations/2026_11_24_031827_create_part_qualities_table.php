@@ -1,0 +1,26 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('part_qualities', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 60);
+            $table->string('slug', 80)->unique();
+            $table->string('description', 300)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->unsignedSmallInteger('sort')->default(0);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('part_qualities');
+    }
+};

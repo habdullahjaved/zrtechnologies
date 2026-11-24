@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Pricing\PricingService;
 use App\Settings\BusinessSettings;
 use App\Support\BookingCallToAction;
 use App\Support\Phone;
@@ -10,8 +11,13 @@ use Illuminate\Contracts\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(BusinessSettings $business, BookingCallToAction $booking): View
+    public function __invoke(BusinessSettings $business, BookingCallToAction $booking, PricingService $pricing): View
     {
+        $popularRepairs = array_values(array_filter(
+            $pricing->repairsWithFromPrices(),
+            fn (array $item): bool => $item['repair']->is_popular,
+        ));
+
         return view('pages.home', [
             'seo' => new SeoData(
                 image: 'images/og/og-home.jpg',
@@ -21,6 +27,7 @@ class HomeController extends Controller
             'bookingOpensWhatsApp' => $booking->opensWhatsApp(),
             'phoneHref' => Phone::telHref($business->phone),
             'phoneDisplay' => Phone::display($business->phone),
+            'popularRepairs' => $popularRepairs,
         ]);
     }
 }

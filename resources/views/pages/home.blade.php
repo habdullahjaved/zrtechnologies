@@ -19,7 +19,7 @@
         />
         <div class="absolute inset-0 -z-10 bg-linear-to-b from-navy-950/70 via-navy-900/30 to-transparent md:bg-linear-to-r md:from-navy-950/80 md:via-navy-900/40 md:to-transparent"></div>
 
-        <div class="mx-auto max-w-7xl px-4 pt-12 pb-[27rem] sm:px-6 sm:pb-[34rem] md:pt-24 md:pb-28 lg:px-8 lg:pt-28 lg:pb-36">
+        <div class="mx-auto max-w-7xl px-4 pt-12 pb-108 sm:px-6 sm:pb-136 md:pt-24 md:pb-28 lg:px-8 lg:pt-28 lg:pb-36">
             <div class="max-w-xl motion-safe:animate-fade-up lg:max-w-2xl">
                 <x-ui.badge tone="on-dark">
                     <x-heroicon-s-map-pin class="size-3.5" aria-hidden="true" />
@@ -45,6 +45,10 @@
                     </x-ui.button>
                 </div>
 
+                <div class="mt-8 max-w-lg">
+                    <livewire:postcode-checker variant="hero" id-prefix="hero-postcode" />
+                </div>
+
                 <ul class="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 text-sm font-semibold text-white sm:max-w-lg">
                     @foreach ([
                         ['icon' => 'heroicon-s-truck', 'label' => 'Collection & delivery'],
@@ -63,6 +67,17 @@
             </div>
         </div>
     </section>
+
+    {{-- Instant price checker --}}
+    <x-ui.section tone="ice">
+        <x-ui.section-heading eyebrow="Instant prices" title="Get your repair price in seconds">
+            Choose your iPhone to see the price of every repair, including parts and labour.
+        </x-ui.section-heading>
+
+        <div class="mx-auto mt-12 max-w-5xl">
+            <livewire:price-checker id-prefix="home-price-checker" />
+        </div>
+    </x-ui.section>
 
     {{-- How it works --}}
     <x-ui.section tone="white">
@@ -92,6 +107,44 @@
             @endforeach
         </ol>
     </x-ui.section>
+
+    {{-- Popular repairs --}}
+    @if ($popularRepairs !== [])
+        <x-ui.section tone="white" class="pt-0 sm:pt-0 lg:pt-0">
+            <x-ui.section-heading eyebrow="Popular repairs" title="The repairs we do most">
+                Clear prices for every model. Choose your repair to get started.
+            </x-ui.section-heading>
+
+            <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ($popularRepairs as ['repair' => $repair, 'from_pence' => $fromPence])
+                    <li>
+                        <x-ui.card class="flex h-full flex-col" :interactive="true">
+                            @if ($repair->icon)
+                                <img src="{{ asset("images/icons/icon-{$repair->icon}-navy-96.webp") }}" alt="" width="56" height="56" loading="lazy" class="size-14 rounded-2xl bg-ice-50 p-2">
+                            @endif
+                            <h3 class="mt-5 text-xl font-bold">{{ $repair->name }}</h3>
+                            @if ($repair->summary)
+                                <p class="mt-2 flex-1 leading-relaxed">{{ $repair->summary }}</p>
+                            @endif
+                            <p class="mt-5 flex items-baseline gap-1.5">
+                                <span class="text-sm">from</span>
+                                <span class="font-heading text-2xl font-extrabold text-navy-900">{{ \App\Support\Money::format($fromPence) }}</span>
+                            </p>
+                        </x-ui.card>
+                    </li>
+                @endforeach
+            </ul>
+
+            @if (Route::has('prices'))
+                <div class="mt-10 text-center">
+                    <x-ui.button :href="route('prices')" variant="secondary">
+                        See all repair prices
+                        <x-heroicon-m-arrow-right class="size-4" aria-hidden="true" />
+                    </x-ui.button>
+                </div>
+            @endif
+        </x-ui.section>
+    @endif
 
     {{-- Why ZR Technologies --}}
     <x-ui.section tone="ice">

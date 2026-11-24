@@ -8,7 +8,9 @@ use Illuminate\Database\Seeder;
 /**
  * Seeds everything the application needs.
  *
- * Production: roles/permissions and the owner's super admin account only.
+ * All environments: roles/permissions, the owner's super admin account, and
+ * the draft catalogue, prices, service areas and collection timetable (only
+ * created when missing, so the owner's edits survive re-seeding).
  * Local/testing: also one demo account per staff role.
  *
  * Business settings (NAP, opening hours, SEO defaults) are created by the
@@ -23,6 +25,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             AdminUserSeeder::class,
+            CatalogueSeeder::class,
+            CoverageSeeder::class,
         ]);
 
         if (! app()->isProduction()) {

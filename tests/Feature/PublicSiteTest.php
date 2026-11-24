@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\RepairPrice;
+use App\Models\RepairType;
+use App\Models\ServiceArea;
 use App\Settings\BusinessSettings;
 use App\Settings\SiteSettings;
 
@@ -109,4 +112,40 @@ it('shows a branded 404 page that is not indexed', function () {
 
 it('serves the style guide only in local development', function () {
     expect(app('router')->has('styleguide'))->toBe(app()->isLocal());
+});
+
+it('renders the repair prices page with a crawlable price list', function () {
+    $price = RepairPrice::factory()->create(['price_pence' => 8900]);
+
+    $response = $this->get(route('prices'))
+        ->assertOk()
+        ->assertSee('<title>iPhone Repair Prices in Blackburn | ZR Technologies</title>', false)
+        ->assertSee($price->deviceModel->name)
+        ->assertSee('£89');
+
+    expect(substr_count($response->getContent(), '<h1'))->toBe(1);
+});
+
+it('renders the areas page with the active towns and their districts', function () {
+    ServiceArea::factory()->districts(['BB3'])->create(['name' => 'Darwen', 'town' => 'Darwen']);
+    ServiceArea::factory()->districts(['PR1'])->inactive()->create(['name' => 'Preston', 'town' => 'Preston']);
+
+    $response = $this->get(route('areas.index'))
+        ->assertOk()
+        ->assertSee('Darwen')
+        ->assertSee('BB3')
+        ->assertDontSee('Preston')
+        ->assertSee('Check we collect from you');
+
+    expect(substr_count($response->getContent(), '<h1'))->toBe(1);
+});
+
+it('links the new pages from the header and shows popular repairs on the home page', function () {
+    $popular = RepairType::factory()->popular()->create(['name' => 'Battery Replacement']);
+    RepairPrice::factory()->for($popular)->create(['price_pence' => 4900]);
+
+    $this->get(route('home'))
+        ->assertSee('href="'.route('prices').'"', false)
+        ->assertSee('href="'.route('areas.index').'"', false)
+        ->assertSeeInOrder(['The repairs we do most', 'Battery Replacement', 'from', '£49']);
 });

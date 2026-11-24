@@ -28,6 +28,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'postcodes_io' => [
+        'url' => env('POSTCODES_IO_URL', 'https://api.postcodes.io'),
+        'timeout' => (int) env('POSTCODES_IO_TIMEOUT', 4),
+        'cache_days' => 30,
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
