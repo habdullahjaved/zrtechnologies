@@ -38,12 +38,12 @@ it('shows every repair price for the chosen model', function () {
         ->assertSee('£59');
 });
 
-it('prefills a WhatsApp booking message with the chosen model and repair', function () {
-    $message = rawurlencode("Hi ZR Technologies, I'd like to book a Screen Replacement (Premium) for my iPhone 15.");
+it('links each price to the booking form, prefilled with the model and repair', function () {
+    $url = route('booking.create', ['model' => 'iphone-15', 'repair' => $this->screen->slug, 'quality' => $this->premium->slug]);
 
     Livewire::test(PriceChecker::class)
         ->call('selectModel', 'iphone-15')
-        ->assertSeeHtml('https://wa.me/447360127538?text='.$message);
+        ->assertSeeHtml(e($url));
 });
 
 it('opens on a model from the link, and ignores unknown models', function () {

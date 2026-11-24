@@ -9,9 +9,11 @@ use Illuminate\Database\Seeder;
  * Seeds everything the application needs.
  *
  * All environments: roles/permissions, the owner's super admin account, and
- * the draft catalogue, prices, service areas and collection timetable (only
- * created when missing, so the owner's edits survive re-seeding).
- * Local/testing: also one demo account per staff role.
+ * the draft catalogue, prices, service areas and collection timetable, and the
+ * message templates (only created when missing, so the owner's edits survive
+ * re-seeding).
+ * Local/testing: also one demo account per staff role and sample CRM records
+ * (names start with "Demo").
  *
  * Business settings (NAP, opening hours, SEO defaults) are created by the
  * settings migrations in database/settings, so they exist after `migrate`.
@@ -27,10 +29,11 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             CatalogueSeeder::class,
             CoverageSeeder::class,
+            MessageTemplateSeeder::class,
         ]);
 
         if (! app()->isProduction()) {
-            $this->call(DemoStaffSeeder::class);
+            $this->call([DemoStaffSeeder::class, DemoCrmSeeder::class]);
         }
     }
 }

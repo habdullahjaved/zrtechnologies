@@ -87,9 +87,9 @@ it('sends baseline security headers', function () {
         ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 });
 
-it('points Book a Repair at WhatsApp until the booking wizard exists', function () {
+it('points Book a Repair at the online booking', function () {
     $this->get(route('home'))
-        ->assertSee('https://wa.me/447360127538?text='.rawurlencode("Hi ZR Technologies, I'd like to book an iPhone repair."), false);
+        ->assertSee('href="'.route('booking.create').'"', false);
 });
 
 it('shows the announcement bar only when one is set', function () {

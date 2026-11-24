@@ -74,5 +74,16 @@
         </x-ui.section>
     @endif
 
+    <x-ui.section tone="white">
+        <div class="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+            <x-ui.section-heading eyebrow="Can’t see your repair?" title="Ask us for a quote" align="left">
+                Tell us your model and what is wrong. We will reply with a price, usually within a few working hours.
+            </x-ui.section-heading>
+            <x-ui.card id="quote" class="scroll-mt-28">
+                <livewire:enquiry-form type="quote" id-prefix="prices-quote" />
+            </x-ui.card>
+        </div>
+    </x-ui.section>
+
     <x-site.contact-actions />
 </x-layouts.app>

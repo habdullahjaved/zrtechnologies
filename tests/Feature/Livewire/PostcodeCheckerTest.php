@@ -33,7 +33,7 @@ it('confirms collection with the fee and the next slot', function () {
         ->assertSee('Accrington')
         ->assertSee('£5')
         ->assertSee('Today, 9am–12pm')
-        ->assertSeeHtml(rawurlencode('My postcode is BB5.'));
+        ->assertSeeHtml(e(route('booking.create', ['postcode' => 'BB5'])));
 });
 
 it('shows free collection when there is no fee', function () {

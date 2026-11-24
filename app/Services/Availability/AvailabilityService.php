@@ -3,9 +3,11 @@
 namespace App\Services\Availability;
 
 use App\Data\CollectionSlot;
+use App\Enums\JobStatus;
 use App\Models\AvailabilityOverride;
 use App\Models\AvailabilityWindow;
 use App\Models\BlackoutDate;
+use App\Models\RepairJob;
 use App\Settings\BookingSettings;
 use Illuminate\Support\Carbon;
 
@@ -19,7 +21,7 @@ use Illuminate\Support\Carbon;
  *  - same-day bookings close at the "same-day cutoff";
  *  - a date-specific override replaces a window's capacity (0 closes it).
  *
- * Booked collections are subtracted from capacity once repair jobs exist (Phase 3).
+ *  - collections already booked (jobs still waiting for collection) use up capacity.
  */
 class AvailabilityService
 {
@@ -60,6 +62,18 @@ class AvailabilityService
                 $override->date->toDateString().':'.$override->availability_window_id => $override->capacity,
             ]);
 
+        $booked = RepairJob::query()
+            ->whereIn('status', JobStatus::holdingSlot())
+            ->whereBetween('collection_date', [$today->toDateString(), $lastDay->toDateString()])
+            ->whereNotNull('availability_window_id')
+            ->selectRaw('collection_date, availability_window_id, count(*) as bookings')
+            ->groupBy('collection_date', 'availability_window_id')
+            ->toBase()
+            ->get()
+            ->mapWithKeys(fn (object $row): array => [
+                substr((string) $row->collection_date, 0, 10).':'.$row->availability_window_id => (int) $row->bookings,
+            ]);
+
         $slots = [];
 
         for ($date = $today->copy(); $date->lte($lastDay); $date->addDay()) {
@@ -77,7 +91,8 @@ class AvailabilityService
                     continue;
                 }
 
-                $capacity = $overrides->get($date->toDateString().':'.$window->getKey(), $window->capacity);
+                $key = $date->toDateString().':'.$window->getKey();
+                $capacity = $overrides->get($key, $window->capacity) - $booked->get($key, 0);
 
                 if ($capacity <= 0) {
                     continue;
@@ -93,5 +108,19 @@ class AvailabilityService
     public function nextSlot(?Carbon $now = null): ?CollectionSlot
     {
         return $this->upcomingSlots($now)[0] ?? null;
+    }
+
+    /**
+     * The slot for a key such as "2026-11-25:3", if it can still be booked.
+     */
+    public function findSlot(string $key, ?Carbon $now = null): ?CollectionSlot
+    {
+        foreach ($this->upcomingSlots($now) as $slot) {
+            if ($slot->key() === $key) {
+                return $slot;
+            }
+        }
+
+        return null;
     }
 }

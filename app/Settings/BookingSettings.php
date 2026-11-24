@@ -21,6 +21,15 @@ class BookingSettings extends Settings
     /** Offer a post-in repair to customers outside the collection area. */
     public bool $post_in_enabled;
 
+    /** Start of every job reference, e.g. "ZR" gives ZR-2026-000123. */
+    public string $reference_prefix;
+
+    /** Shown on the booking summary, thank-you page and confirmation email. */
+    public string $payment_note;
+
+    /** Passcode, backup and Find My guidance shown before the customer confirms. */
+    public string $passcode_notice;
+
     public static function group(): string
     {
         return 'booking';

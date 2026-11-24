@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Settings;
 use App\Settings\BookingSettings;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
@@ -60,6 +61,28 @@ class ManageBookingSettings extends BaseSettingsPage
                         ->integer()
                         ->minValue(1)
                         ->maxValue(90)
+                        ->required(),
+                ]),
+            Section::make('Booking wording')
+                ->columnSpanFull()
+                ->schema([
+                    Textarea::make('payment_note')
+                        ->label('Payment note')
+                        ->helperText('Shown on the booking summary, the thank-you page and the confirmation email.')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->required(),
+                    Textarea::make('passcode_notice')
+                        ->label('Passcode, backup and Find My notice')
+                        ->helperText('Shown before the customer confirms and in the confirmation email.')
+                        ->rows(3)
+                        ->maxLength(800)
+                        ->required(),
+                    TextInput::make('reference_prefix')
+                        ->label('Job reference prefix')
+                        ->helperText('References look like ZR-2026-000123. Changing this only affects new jobs.')
+                        ->maxLength(6)
+                        ->alpha()
                         ->required(),
                 ]),
             Section::make('Outside our area')

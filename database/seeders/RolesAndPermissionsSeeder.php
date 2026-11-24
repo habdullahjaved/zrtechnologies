@@ -42,6 +42,14 @@ class RolesAndPermissionsSeeder extends Seeder
         'AvailabilityOverride' => self::CRUD,
         'BlackoutDate' => self::CRUD,
         'ManageBookingSettings' => ['View'],
+
+        // Phase 3: CRM and workshop.
+        'Lead' => self::CRUD,
+        'Customer' => self::CRUD,
+        // ViewAll: see every job, not only those assigned to you. ViewFinancials: see prices and totals.
+        'RepairJob' => [...self::CRUD, 'ViewAll', 'ViewFinancials'],
+        'MessageTemplate' => ['ViewAny', 'View', 'Update'],
+        'ManageNotificationSettings' => ['View'],
     ];
 
     /**
@@ -115,6 +123,10 @@ class RolesAndPermissionsSeeder extends Seeder
                 'View:ManageBookingSettings',
                 ...$this->crudFor(['DeviceModel', 'RepairType', 'RepairPrice', 'PartQuality', 'ServiceCategory']),
                 ...$this->crudFor(['ServiceArea', 'AvailabilityWindow', 'AvailabilityOverride', 'BlackoutDate']),
+                ...$this->crudFor(['Lead', 'Customer', 'RepairJob']),
+                'ViewAll:RepairJob', 'ViewFinancials:RepairJob',
+                'ViewAny:MessageTemplate', 'View:MessageTemplate', 'Update:MessageTemplate',
+                'View:ManageNotificationSettings',
             ],
 
             // Content editors write repair and model descriptions; they cannot change prices.
@@ -125,17 +137,24 @@ class RolesAndPermissionsSeeder extends Seeder
                 'Update:DeviceModel',
                 'Update:RepairType',
                 'ViewAny:ServiceArea', 'View:ServiceArea',
+                // Wording of customer emails and WhatsApp replies.
+                'ViewAny:MessageTemplate', 'View:MessageTemplate', 'Update:MessageTemplate',
             ],
 
-            // Repair job permissions arrive with the workshop (Phase 3).
+            // Technicians see and progress the jobs assigned to them, without prices.
             StaffRole::Technician->value => [
                 ...self::VIEW_CATALOGUE,
+                'ViewAny:RepairJob', 'View:RepairJob', 'Update:RepairJob',
             ],
 
-            // Lead and customer permissions arrive with the CRM (Phase 3).
+            // Sales and support work leads and customers and book jobs; they cannot delete records.
             StaffRole::SalesSupport->value => [
                 ...self::VIEW_CATALOGUE,
                 ...self::VIEW_COVERAGE,
+                'ViewAny:Lead', 'View:Lead', 'Create:Lead', 'Update:Lead',
+                'ViewAny:Customer', 'View:Customer', 'Create:Customer', 'Update:Customer',
+                'ViewAny:RepairJob', 'View:RepairJob', 'Create:RepairJob', 'Update:RepairJob',
+                'ViewAll:RepairJob', 'ViewFinancials:RepairJob',
             ],
         ];
     }

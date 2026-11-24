@@ -23,6 +23,9 @@ class RepairType extends Model
     /** @use HasFactory<RepairTypeFactory> */
     use HasFactory, LogsActivity;
 
+    /** The "not sure what's wrong" option in the booking wizard. */
+    public const string DIAGNOSTICS = 'diagnostics';
+
     /**
      * @return array<string, string>
      */

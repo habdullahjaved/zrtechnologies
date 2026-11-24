@@ -18,6 +18,11 @@ class RobotsController extends Controller
         if ($indexing->isAllowed()) {
             $lines[] = 'Disallow: /'.trim(config('zr.admin.path'), '/');
             $lines[] = 'Disallow: /livewire';
+
+            // Private, signed customer pages (they are also noindex).
+            $lines[] = 'Disallow: /book-repair/thank-you';
+            $lines[] = 'Disallow: /book-repair/calendar/';
+            $lines[] = 'Disallow: /track-repair/';
         } else {
             $lines[] = 'Disallow: /';
         }

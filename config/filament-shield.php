@@ -5,8 +5,12 @@ use App\Filament\Resources\Activities\ActivityResource;
 use App\Filament\Resources\AvailabilityOverrides\AvailabilityOverrideResource;
 use App\Filament\Resources\AvailabilityWindows\AvailabilityWindowResource;
 use App\Filament\Resources\BlackoutDates\BlackoutDateResource;
+use App\Filament\Resources\Customers\CustomerResource;
 use App\Filament\Resources\DeviceModels\DeviceModelResource;
+use App\Filament\Resources\Leads\LeadResource;
+use App\Filament\Resources\MessageTemplates\MessageTemplateResource;
 use App\Filament\Resources\PartQualities\PartQualityResource;
+use App\Filament\Resources\RepairJobs\RepairJobResource;
 use App\Filament\Resources\RepairPrices\RepairPriceResource;
 use App\Filament\Resources\RepairTypes\RepairTypeResource;
 use App\Filament\Resources\ServiceAreas\ServiceAreaResource;
@@ -208,6 +212,10 @@ return [
             RepairTypeResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
             ServiceAreaResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
             ServiceCategoryResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            LeadResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            CustomerResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            RepairJobResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'viewAll', 'viewFinancials'],
+            MessageTemplateResource::class => ['viewAny', 'view', 'update'],
             RoleResource::class => [
                 'viewAny',
                 'view',
