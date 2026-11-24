@@ -1,0 +1,152 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../../app/View/**/*.php';
+@source '../../app/Support/**/*.php';
+
+/*
+|--------------------------------------------------------------------------
+| Fonts (self-hosted, latin subset, SIL Open Font License)
+|--------------------------------------------------------------------------
+*/
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/montserrat-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('/fonts/montserrat-latin-800-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter Variable';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/inter-latin-variable.woff2') format('woff2-variations');
+}
+
+/*
+|--------------------------------------------------------------------------
+| Design tokens (docs/PHASE_0_PLAN.md §6)
+|--------------------------------------------------------------------------
+| sky-400 fails contrast on light backgrounds: decorative use or on navy only.
+| Use success-700 / warning-700 for text; 600 / 500 for icons and fills.
+*/
+
+@theme {
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-heading: 'Montserrat', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+    --color-navy-950: #00163f;
+    --color-navy-900: #0a1f4e;
+    --color-navy-800: #122a63;
+    --color-royal-700: #004a95;
+    --color-royal-600: #0058b0;
+    --color-blue-500: #1e6fd9;
+    --color-sky-400: #3fa9f5;
+    --color-sky-200: #b3dcfb;
+    --color-ice-100: #dcebff;
+    --color-ice-50: #eef5ff;
+    --color-ink: #475569;
+    --color-ink-strong: #1e293b;
+    --color-success-600: #16a34a;
+    --color-success-700: #15803d;
+    --color-warning-500: #f59e0b;
+    --color-warning-700: #b45309;
+    --color-danger-600: #dc2626;
+    --color-whatsapp: #0f8044; /* white text 5.0:1 */
+
+    --radius-card: 1rem;
+
+    --shadow-soft: 0 8px 30px -12px rgb(10 31 78 / 0.18);
+    --shadow-lift: 0 18px 40px -16px rgb(10 31 78 / 0.28);
+    --shadow-glow: 0 0 0 4px rgb(63 169 245 / 0.35);
+
+    --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    @keyframes fade-up {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+@utility bg-brand-gradient {
+    background-image: linear-gradient(135deg, #0a1f4e 0%, #0058b0 55%, #3fa9f5 100%);
+}
+
+@utility text-balance-safe {
+    text-wrap: balance;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Base
+|--------------------------------------------------------------------------
+*/
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        scroll-padding-top: 6rem;
+    }
+
+    body {
+        @apply bg-white font-sans text-ink antialiased;
+        font-feature-settings: 'cv11', 'ss01';
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply font-heading text-navy-900;
+        text-wrap: balance;
+        letter-spacing: -0.015em;
+    }
+
+    a {
+        @apply transition-colors;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-sky-400;
+    }
+
+    ::selection {
+        @apply bg-sky-200 text-navy-950;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}

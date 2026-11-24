@@ -1,0 +1,64 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../../../vendor/pxlrbt/filament-activity-log/resources/css/styles.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/*
+|--------------------------------------------------------------------------
+| ZR Technologies admin theme
+|--------------------------------------------------------------------------
+| Colours come from the panel provider; this file adds the brand typography
+| and the gradient sign-in screens.
+*/
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/montserrat-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('/fonts/montserrat-latin-800-normal.woff2') format('woff2');
+}
+
+.fi-header-heading,
+.fi-simple-header-heading,
+.fi-section-header-heading,
+.fi-modal-heading,
+.fi-wi-stats-overview-stat-value {
+    font-family: 'Montserrat', var(--font-sans);
+    letter-spacing: -0.01em;
+}
+
+/* Sign-in, password reset and MFA screens: brand gradient with the orbital swoosh. */
+.fi-simple-layout {
+    background:
+        radial-gradient(ellipse 70% 45% at 85% 10%, rgb(63 169 245 / 0.35), transparent 60%),
+        linear-gradient(135deg, #0a1f4e 0%, #0058b0 55%, #3fa9f5 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.fi-simple-layout::before {
+    content: '';
+    position: absolute;
+    inset: auto -20% -35% -20%;
+    height: 70%;
+    border-radius: 50%;
+    border-top: 2px solid rgb(255 255 255 / 0.18);
+    transform: rotate(-8deg);
+    pointer-events: none;
+}
+
+.fi-simple-main {
+    position: relative;
+    border-radius: 1.25rem;
+    box-shadow: 0 30px 80px -20px rgb(0 22 63 / 0.55);
+}
