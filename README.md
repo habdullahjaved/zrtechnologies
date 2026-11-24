@@ -56,6 +56,14 @@ php artisan serve
 - Admin: <http://127.0.0.1:8000/admin>
 - Design system reference (local only): <http://127.0.0.1:8000/styleguide>
 
+### Running under XAMPP (Windows)
+
+XAMPP's Apache runs PHP 8.3, but this project needs PHP 8.5, installed separately in `C:\php\8.5`. Without changing XAMPP for other sites:
+
+- `C:\php\8.5\fastcgi\start-php85-fastcgi.vbs` starts four PHP 8.5 FastCGI workers (ports 9085–9088); `stop-php85-fastcgi.cmd` stops them. Put a shortcut to the `.vbs` in the Windows Startup folder so they start at log-in.
+- `C:\xampp\apache\conf\extra\httpd-php85-zrtechnologies.conf` (included at the end of `httpd.conf`) sends `.php` requests in this folder to those workers and adds <http://localhost:8085>, which serves `public/` as the site root. Every other site keeps PHP 8.3.
+- Restart Apache from the XAMPP Control Panel after changing either file. To undo, remove the `Include` line from `httpd.conf` (a backup is in `httpd.conf.before-php85.bak`).
+
 ### What the database is seeded with
 
 | Data | Source | Environments |
