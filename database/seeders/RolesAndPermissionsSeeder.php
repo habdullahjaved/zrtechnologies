@@ -63,6 +63,24 @@ class RolesAndPermissionsSeeder extends Seeder
         'MenuItem' => self::CRUD,
         'Redirect' => self::CRUD,
         'NotFoundLog' => ['ViewAny', 'View', 'Delete'],
+
+        // Phase 5: tracking and consent.
+        'TrackingEvent' => ['ViewAny', 'View', 'Update'],
+        'ConsentRecord' => ['ViewAny', 'View'],
+        'TrackingHealth' => ['View'],
+        'ManageTrackingSettings' => ['View'],
+        'ManageConsentSettings' => ['View'],
+    ];
+
+    /**
+     * Tracking screens and settings, for managers and the marketing team.
+     *
+     * @var list<string>
+     */
+    private const array TRACKING = [
+        'ViewAny:TrackingEvent', 'View:TrackingEvent', 'Update:TrackingEvent',
+        'ViewAny:ConsentRecord', 'View:ConsentRecord',
+        'View:TrackingHealth', 'View:ManageTrackingSettings', 'View:ManageConsentSettings',
     ];
 
     /**
@@ -149,6 +167,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'View:ManageNotificationSettings',
                 ...$this->crudFor(self::CONTENT_SUBJECTS),
                 'ViewAny:NotFoundLog', 'View:NotFoundLog', 'Delete:NotFoundLog',
+                ...self::TRACKING,
             ],
 
             // Content editors write repair and model descriptions; they cannot change prices.
@@ -164,6 +183,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 // Pages, repair pages, blog, videos, FAQs, reviews, menus and redirects.
                 ...$this->crudFor(self::CONTENT_SUBJECTS),
                 'ViewAny:NotFoundLog', 'View:NotFoundLog', 'Delete:NotFoundLog',
+                ...self::TRACKING,
             ],
 
             // Technicians see and progress the jobs assigned to them, without prices.

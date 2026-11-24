@@ -36,6 +36,7 @@ class ViewRepairJob extends ViewRecord
                 RepairJobActions::assignTechnician(),
                 RepairJobActions::directions(),
                 RepairJobActions::trackingPage(),
+                RepairJobActions::askForReview(),
                 EditAction::make(),
             ])->button()->label('More')->color('gray'),
         ];

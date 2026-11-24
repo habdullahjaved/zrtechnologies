@@ -3,25 +3,33 @@
 namespace App\Services\Attribution;
 
 use App\Data\AttributionData;
+use App\Services\Tracking\ConsentState;
+use App\Settings\TrackingSettings;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 
 /**
  * Remembers where a visitor came from so it can be stored on their lead.
  *
- * Touches live in the visitor's session (first party, no extra cookie):
+ * Touches live in the visitor's session:
  *  - first touch: the first visit in this session;
  *  - last touch: the latest visit that brought click IDs, UTM tags or an
  *    outside referrer (plain direct visits never overwrite it);
  *  - the last few pages viewed, for the lead timeline.
  *
- * A 90-day cross-session cookie, set only with consent, follows with the
- * cookie banner in Phase 5.
+ * With marketing consent, the first and last touch are also kept for 90 days
+ * in an encrypted first-party cookie, so a visitor who clicks an advert today
+ * and books next week is still credited to it.
  */
 final class AttributionTracker
 {
     public const string SESSION_KEY = 'attribution';
+
+    public const string COOKIE = 'zr_attribution';
+
+    public const int COOKIE_DAYS = 90;
 
     /** Query parameters captured from landing URLs. */
     public const array PARAMETERS = [
@@ -41,6 +49,13 @@ final class AttributionTracker
 
         $session = $request->session();
         $state = (array) $session->get(self::SESSION_KEY, []);
+        $consent = ConsentState::fromRequest($request);
+
+        // A returning visitor (with marketing consent): pick up where the cookie left off.
+        if (! isset($state['first_touch']) && $consent->marketing) {
+            $state = [...$state, ...$this->fromCookie($request)];
+        }
+
         $touch = $this->touchFrom($request);
         $isCampaignTouch = $this->isCampaignTouch($touch);
 
@@ -57,6 +72,61 @@ final class AttributionTracker
         $state['pages'] = array_slice($pages, -self::MAX_PAGES);
 
         $session->put(self::SESSION_KEY, $state);
+
+        if ($consent->marketing && ($isCampaignTouch || ! $request->cookies->has(self::COOKIE))) {
+            $this->remember($state);
+        }
+    }
+
+    /**
+     * Keep the first and last touch for 90 days (marketing consent only).
+     *
+     * @param  array<string, mixed>  $state
+     */
+    public function remember(array $state): void
+    {
+        $touches = array_filter([
+            'first_touch' => $state['first_touch'] ?? null,
+            'last_touch' => $state['last_touch'] ?? null,
+        ]);
+
+        if ($touches !== []) {
+            Cookie::queue(self::COOKIE, (string) json_encode($touches), self::COOKIE_DAYS * 24 * 60);
+        }
+    }
+
+    /**
+     * Remove the 90-day cookie when marketing consent is withdrawn.
+     */
+    public function forget(): void
+    {
+        Cookie::queue(Cookie::forget(self::COOKIE));
+    }
+
+    /**
+     * @return array{first_touch?: array<string, string|null>, last_touch?: array<string, string|null>}
+     */
+    private function fromCookie(Request $request): array
+    {
+        $raw = $request->cookies->get(self::COOKIE);
+        $decoded = is_string($raw) ? json_decode($raw, true) : null;
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $touches = [];
+
+        foreach (['first_touch', 'last_touch'] as $key) {
+            if (is_array($decoded[$key] ?? null)) {
+                $touches[$key] = array_map(
+                    fn (mixed $value): ?string => is_scalar($value) ? Str::limit($this->clean((string) $value), 490, '') : null,
+                    array_intersect_key($decoded[$key], array_flip([...self::PARAMETERS, 'landing_page', 'referrer', 'captured_at'])),
+                );
+            }
+        }
+
+        return $touches;
     }
 
     /**
@@ -85,7 +155,30 @@ final class AttributionTracker
             deviceType: self::deviceType((string) $request->userAgent()),
             ipHash: self::hashIp($request->ip()),
             userAgent: Str::limit((string) $request->userAgent(), 490, ''),
+            gaSessionId: $this->gaSessionId($request),
+            consent: ConsentState::fromRequest($request)->toArray(),
         );
+    }
+
+    /**
+     * GA4's session ID from the stream cookie (_ga_{id}): "GS1.1.1700000000.3…"
+     * or the newer "GS2.1.s1700000000$o3…" format.
+     */
+    private function gaSessionId(Request $request): ?string
+    {
+        $measurementId = app(TrackingSettings::class)->ga4_measurement_id;
+
+        if (blank($measurementId)) {
+            return null;
+        }
+
+        $cookie = $this->cookie($request, '_ga_'.Str::after((string) $measurementId, 'G-'));
+
+        if ($cookie !== null && preg_match('/^GS\d\.\d\.s?(\d{9,11})/', $cookie, $matches) === 1) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     /**

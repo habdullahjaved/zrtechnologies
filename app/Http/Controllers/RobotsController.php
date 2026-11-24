@@ -27,6 +27,7 @@ class RobotsController extends Controller
             $lines[] = 'Disallow: /book-repair/calendar/';
             $lines[] = 'Disallow: /track-repair/';
             $lines[] = 'Disallow: /reviews/leave';
+            $lines[] = 'Disallow: /exports/';
 
             if (! $site->index_tag_pages) {
                 $lines[] = 'Disallow: /blog/tag/';

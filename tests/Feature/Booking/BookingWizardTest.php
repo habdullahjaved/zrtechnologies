@@ -326,3 +326,19 @@ function bookingAtReviewWithoutSlot(): Testable
         ->assertDontSeeHtml('value="'.$test->slotKey.'"')
         ->assertSeeHtml('value="2026-12-07:'.$test->morning->id.'"');
 }
+
+it('moves straight to the repairs as soon as a model is picked', function () {
+    DeviceModel::factory()->create(['name' => 'iPhone 13', 'slug' => 'iphone-13', 'is_popular' => true]);
+    RepairPrice::factory()->for(DeviceModel::query()->where('slug', 'iphone-13')->sole())->for($this->battery)->create();
+
+    Livewire::test(BookingWizard::class)
+        ->set('postcode', 'BB2 4NY')
+        ->call('checkPostcode')
+        ->assertSet('step', 2)
+        ->assertSee('Search for your model')
+        ->assertSee('Popular models')
+        ->assertSee('Or choose from all models')
+        ->call('chooseModel', 'iphone-15')
+        ->assertSet('step', 3)
+        ->assertSee('What needs fixing on your iPhone 15?');
+});

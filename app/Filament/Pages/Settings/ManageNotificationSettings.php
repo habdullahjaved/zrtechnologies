@@ -51,6 +51,9 @@ class ManageNotificationSettings extends BaseSettingsPage
                     Toggle::make('notify_partial_bookings')
                         ->label('Unfinished bookings')
                         ->helperText('When someone gives their mobile or email in the booking form but does not finish.'),
+                    Toggle::make('send_review_requests')
+                        ->label('Email customers a Google review request')
+                        ->helperText('Sent once, a few hours after a repair is marked completed. Needs the Google review link in Settings → Social.'),
                 ]),
             Section::make('Chat apps')
                 ->description('Optional. Alerts go to these as well as email.')

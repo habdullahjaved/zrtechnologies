@@ -34,6 +34,16 @@ return [
         'cache_days' => 30,
     ],
 
+    // Server-side conversions. IDs and secrets live in Admin → Settings → Tracking.
+    'meta' => [
+        'graph_url' => env('META_GRAPH_URL', 'https://graph.facebook.com'),
+        'graph_version' => env('META_GRAPH_VERSION', 'v23.0'),
+    ],
+
+    'ga4' => [
+        'url' => env('GA4_MP_URL', 'https://www.google-analytics.com'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

@@ -1,5 +1,7 @@
 <?php
 
+use App\Console\Commands\LaunchCheck;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
 /*
@@ -22,3 +24,8 @@ Schedule::command('content:publish-scheduled')->everyFiveMinutes()->withoutOverl
 
 // Remove expired password-reset tokens.
 Schedule::command('auth:clear-resets')->daily()->at('03:30');
+
+// Heartbeat for launch:check: proves the cron job is running.
+Schedule::call(fn () => Cache::put(LaunchCheck::HEARTBEAT_KEY, now()->toIso8601String(), now()->addMinutes(5)))
+    ->everyMinute()
+    ->name('scheduler-heartbeat');

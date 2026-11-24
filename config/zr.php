@@ -70,6 +70,21 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Content Security Policy
+    |--------------------------------------------------------------------------
+    |
+    | Applied to public pages (not the admin). Set CSP_REPORT_ONLY=true to
+    | test a change without blocking anything.
+    |
+    */
+
+    'csp' => [
+        'enabled' => (bool) env('CSP_ENABLED', true),
+        'report_only' => (bool) env('CSP_REPORT_ONLY', false),
+    ],
+
     'page_cache' => [
         'enabled' => (bool) env('PAGE_CACHE_ENABLED', true),
         'store' => env('PAGE_CACHE_STORE'),

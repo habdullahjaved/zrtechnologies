@@ -5,6 +5,7 @@ namespace App\Services\Cache;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,6 +22,8 @@ class PageCache
     private const string VERSION_KEY = 'page-cache:version';
 
     private const string TOKEN_PLACEHOLDER = '__ZR_CSRF_TOKEN__';
+
+    private const string NONCE_PLACEHOLDER = '__ZR_CSP_NONCE__';
 
     /**
      * Tracking parameters that do not change the page. They are read by the
@@ -57,7 +60,10 @@ class PageCache
             return null;
         }
 
-        return response(str_replace(self::TOKEN_PLACEHOLDER, $csrfToken, $cached['content']), 200, [
+        $content = str_replace(self::TOKEN_PLACEHOLDER, $csrfToken, $cached['content']);
+        $content = str_replace(self::NONCE_PLACEHOLDER, (string) Vite::cspNonce(), $content);
+
+        return response($content, 200, [
             'Content-Type' => $cached['content_type'] ?? 'text/html; charset=UTF-8',
             'X-Page-Cache' => 'HIT',
         ]);
@@ -66,6 +72,11 @@ class PageCache
     public function put(string $key, Response $response, string $csrfToken): void
     {
         $content = (string) $response->getContent();
+
+        // Each visitor gets their own Content-Security-Policy nonce.
+        if (filled($nonce = Vite::cspNonce())) {
+            $content = str_replace($nonce, self::NONCE_PLACEHOLDER, $content);
+        }
 
         $this->store()->put($key, [
             'content' => $csrfToken !== '' ? str_replace($csrfToken, self::TOKEN_PLACEHOLDER, $content) : $content,

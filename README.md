@@ -17,7 +17,9 @@ The full brief is in [`ZR_TECHNOLOGIES_BUILD_PROMPT.md`](ZR_TECHNOLOGIES_BUILD_P
 | 2 | Catalogue, pricing, coverage, price and postcode checkers | Done |
 | 3 | Booking wizard, leads, customers, repair jobs, emails, repair tracking | Done |
 | 4 | Content & SEO: pages, repair, model and location pages, blog, videos, FAQs, reviews, schema, sitemaps, redirects | Done |
-| 5 | Tracking & go-live | Next |
+| 5 | Tracking & go-live: cookie banner, Consent Mode v2, GA4 / Google Ads / Meta (browser and server), offline conversions, review requests, security headers, Hostinger deployment | Done |
+| 6 | CRM depth: Kanban, tasks, quotes and invoices, checklists, PDFs, inventory | Planned (after launch) |
+| 7 | Dashboard and reports | Planned (after launch) |
 
 ## Requirements
 
@@ -110,6 +112,16 @@ Every seeded price and service area is marked **DRAFT – confirm before launch*
 - **Reviews:** genuine reviews only (copy them from Google). Sample reviews exist only locally and never show in production. Set the Google review link in **Settings → Social** to power `/reviews/leave`.
 - **Page cache:** public pages are cached for anonymous visitors and cleared automatically when content, prices or settings change, and after each `npm run build`. Disable with `PAGE_CACHE_ENABLED=false`.
 
+## Tracking and going live
+
+- **Cookie banner** with Accept all / Reject all / Manage preferences, Google Consent Mode v2 (denied by default) and a server-side consent log (**Marketing → Consent log**).
+- **Tags** (Google Tag Manager, or GA4 + Google Ads + Meta Pixel + Clarity + TikTok directly) load only as consent allows. IDs go in **Settings → Tracking**.
+- **Server-side conversions:** Meta Conversions API for every lead (deduplicated with the Pixel by event ID), GA4 Measurement Protocol and Meta `Purchase` when a repair is completed, and a Google Ads **offline conversions CSV** for scheduled upload. All logged in **Marketing → Tracking events**, retried automatically.
+- **Marketing → Tracking health:** what is set up, what was sent, test buttons, the offline conversions link and ready-made Google Business Profile links.
+- **Review requests:** one email a few hours after a repair is completed (needs the Google review link in Settings → Social), plus an "Ask for a review (WhatsApp)" button on each job.
+- **Security:** Content-Security-Policy with per-request nonces on public pages, HSTS in production, HTTPS and non-www redirects for the live domain.
+- Full guides: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) (Hostinger) and [`docs/TRACKING.md`](docs/TRACKING.md) (events, GTM container, Google Ads and Meta setup). Run `php artisan launch:check` before going live.
+
 ## Staff roles
 
 | Role | Access |
@@ -140,7 +152,7 @@ Shared hosting has no long-running queue worker, so a single cron entry runs the
 
 Emails therefore go out within about a minute, and scheduled pages and posts are published within five minutes of their date. After each deploy, run `php artisan migrate --force` and then `php artisan settings:clear-cache` (settings are cached, so new settings fields need a fresh cache).
 
-See `routes/console.php`. Full Hostinger deployment steps (document root, SSH, `composer2`, cron, SMTP, DNS) are added in Phase 5.
+See `routes/console.php`. Hostinger deployment (document root, SSH, `composer2`, cron, SMTP, SPF/DKIM/DMARC) is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Brand assets
 

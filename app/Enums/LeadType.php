@@ -24,6 +24,14 @@ enum LeadType: string implements HasColor, HasIcon, HasLabel
     case Chatbot = 'chatbot';
     case Manual = 'manual';
 
+    /**
+     * A tap on the phone number or WhatsApp button, logged for reporting.
+     */
+    public function isClick(): bool
+    {
+        return in_array($this, [self::CallClick, self::WhatsAppClick], true);
+    }
+
     public function getLabel(): string
     {
         return match ($this) {

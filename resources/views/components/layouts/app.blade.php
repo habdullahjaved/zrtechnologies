@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
 
+    <x-site.tracking-head />
     <x-site.seo-head :seo="$seo" />
 
     <link rel="preload" href="{{ asset('fonts/montserrat-latin-800-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
@@ -39,7 +40,11 @@
     </main>
 
     <x-site.footer />
-    <x-site.contact-actions variant="mobile-bar" />
+    {{-- The booking form has its own fixed Continue bar on phones. --}}
+    @unless (request()->routeIs('booking.create'))
+        <x-site.contact-actions variant="mobile-bar" />
+    @endunless
+    <x-site.cookie-banner />
 
     @livewireScriptConfig
 </body>

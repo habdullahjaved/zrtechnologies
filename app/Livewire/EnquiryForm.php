@@ -114,6 +114,14 @@ class EnquiryForm extends Component
         ), $attribution->current(request()));
 
         $this->reference = $lead->reference;
+
+        // Browser conversion, sharing the lead's event ID with the server-side send.
+        $this->dispatch('zr-track', name: 'generate_lead', params: array_filter([
+            'event_id' => $lead->event_id,
+            'lead_type' => $lead->type->value,
+            'user_data' => array_filter(['email' => $lead->email, 'phone_number' => $lead->phone]) ?: null,
+        ]));
+
         $this->reset('name', 'email', 'phone', 'postcode', 'companyName', 'model', 'repair', 'message', 'marketingConsent', 'fleetSize');
     }
 

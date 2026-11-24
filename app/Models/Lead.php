@@ -36,6 +36,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $phone
  * @property array<string, mixed>|null $details
  * @property array<string, mixed>|null $attribution
+ * @property array{analytics?: bool, marketing?: bool, decided?: bool, version?: string|null, consent_id?: string|null}|null $consent
  * @property int|null $estimated_value_pence
  * @property int|null $final_value_pence
  * @property Carbon|null $follow_up_at
@@ -50,7 +51,7 @@ use Spatie\Activitylog\Support\LogOptions;
     'contacted_at', 'converted_at', 'marketing_consent',
     'channel', 'first_touch_channel', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'fbc', 'fbp', 'msclkid', 'ttclid',
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'landing_page', 'referrer',
-    'device_type', 'ga_client_id', 'attribution', 'event_id', 'ip_hash', 'user_agent',
+    'device_type', 'ga_client_id', 'ga_session_id', 'attribution', 'consent', 'event_id', 'ip_hash', 'user_agent',
 ])]
 class Lead extends Model
 {
@@ -80,6 +81,7 @@ class Lead extends Model
             'marketing_consent' => 'boolean',
             'details' => 'array',
             'attribution' => 'array',
+            'consent' => 'array',
             'estimated_value_pence' => 'integer',
             'final_value_pence' => 'integer',
             'follow_up_at' => 'datetime',

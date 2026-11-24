@@ -24,6 +24,10 @@ final class MessageTemplateCatalogue
 
     public const string WHATSAPP_JOB_UPDATE = 'whatsapp.job_update';
 
+    public const string REVIEW_REQUEST = 'review.request';
+
+    public const string WHATSAPP_REVIEW_REQUEST = 'whatsapp.review_request';
+
     /** Available in every template. */
     public const array COMMON_VARIABLES = [
         'business_name' => 'Trading name, e.g. ZR Technologies',
@@ -197,6 +201,40 @@ final class MessageTemplateCatalogue
                     'reference' => 'Job reference',
                     'status' => 'Current status, as the customer sees it',
                     'track_url' => 'Link to track the repair',
+                ],
+            ],
+            self::REVIEW_REQUEST => [
+                'channel' => MessageChannel::Mail,
+                'name' => 'Review request',
+                'description' => 'Sent to the customer a few hours after their repair is marked completed, if a Google review link is set. Only ever sent once per repair.',
+                'subject' => 'How did we do, {customer_first_name}?',
+                'body' => <<<'MD'
+                    # Thanks again, {customer_first_name}.
+
+                    We hope your {device} is working perfectly. If you have a moment, we would be very grateful if you could tell others about your experience with a short Google review.
+
+                    It only takes a minute, and it really helps a small local business like ours.
+
+                    If anything wasn’t right, please reply to this email instead so we can put it right.
+                    MD,
+                'variables' => [
+                    'customer_first_name' => 'Customer’s first name',
+                    'device' => 'Model',
+                    'reference' => 'Job reference',
+                    'review_url' => 'Link to leave a Google review',
+                ],
+            ],
+            self::WHATSAPP_REVIEW_REQUEST => [
+                'channel' => MessageChannel::WhatsApp,
+                'name' => 'WhatsApp: review request',
+                'description' => 'Prefilled when staff click "Ask for a review" on a repair job.',
+                'subject' => null,
+                'body' => 'Hi {customer_first_name}, it’s {staff_first_name} from {business_name}. Thanks for choosing us to repair your {device}. If you are happy with the repair, a quick Google review would really help us: {review_url}',
+                'variables' => [
+                    'customer_first_name' => 'Customer’s first name',
+                    'staff_first_name' => 'Your first name',
+                    'device' => 'Model',
+                    'review_url' => 'Link to leave a Google review',
                 ],
             ],
         ];

@@ -39,6 +39,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property Carbon|null $completed_at
  * @property Carbon|null $cancelled_at
  * @property Carbon|null $paid_at
+ * @property Carbon|null $review_requested_at
  * @property Carbon|null $warranty_expires_at
  */
 #[Fillable([
@@ -100,6 +101,7 @@ class RepairJob extends Model
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'paid_at' => 'datetime',
+            'review_requested_at' => 'datetime',
             'warranty_expires_at' => 'date',
         ];
     }

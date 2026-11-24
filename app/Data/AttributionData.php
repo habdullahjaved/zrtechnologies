@@ -13,6 +13,7 @@ final readonly class AttributionData
      * @param  array<string, string|null>  $lastTouch
      * @param  array<string, string|null>  $firstTouch
      * @param  list<array{path: string, at: string}>  $pages
+     * @param  array<string, mixed>  $consent  The visitor's cookie choice (see ConsentState::toArray()).
      */
     public function __construct(
         public Channel $channel,
@@ -26,6 +27,8 @@ final readonly class AttributionData
         public ?string $deviceType = null,
         public ?string $ipHash = null,
         public ?string $userAgent = null,
+        public ?string $gaSessionId = null,
+        public array $consent = [],
     ) {}
 
     /**
@@ -65,6 +68,8 @@ final readonly class AttributionData
             'referrer' => $touch('referrer'),
             'device_type' => $this->deviceType,
             'ga_client_id' => $this->gaClientId,
+            'ga_session_id' => $this->gaSessionId,
+            'consent' => $this->consent ?: null,
             'attribution' => [
                 'first_touch' => $this->firstTouch ?: null,
                 'last_touch' => $this->lastTouch ?: null,

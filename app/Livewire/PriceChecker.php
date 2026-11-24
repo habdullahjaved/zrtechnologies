@@ -40,6 +40,8 @@ class PriceChecker extends Component
 
     public function selectModel(string $slug): void
     {
+        $this->dispatch('zr-track', name: 'view_price', params: ['model' => $slug]);
+
         $this->model = $this->models->contains('slug', $slug) ? $slug : '';
     }
 

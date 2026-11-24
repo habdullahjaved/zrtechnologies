@@ -9,6 +9,7 @@ use App\Services\Seo\SeoResolver;
 use App\Settings\BookingSettings;
 use App\Settings\BusinessSettings;
 use App\Support\Messaging\MessageVariables;
+use App\Support\Money;
 use App\Support\Phone;
 use App\Support\Seo\SeoData;
 use Illuminate\Contracts\View\View;
@@ -49,6 +50,19 @@ class BookingController extends Controller
             'calendarUrl' => URL::signedRoute('booking.calendar', ['reference' => $job->reference]),
             'googleCalendarUrl' => $this->googleCalendarUrl($job, $business),
             'whatsAppUrl' => Phone::whatsAppUrl($business->whatsapp, "Hi {$business->trading_name}, it's about my booking {$job->reference}."),
+            'trackingEvent' => [
+                'name' => 'book_repair',
+                'params' => array_filter([
+                    'event_id' => $job->lead?->event_id,
+                    'reference' => $job->reference,
+                    'lead_type' => 'booking',
+                    'value' => (float) Money::toPounds($job->estimatedTotalPence()),
+                    'currency' => 'GBP',
+                    'device' => $job->deviceModel?->name,
+                    'repairs' => $job->items->pluck('description')->all(),
+                    'user_data' => array_filter(['email' => $job->customer->email, 'phone_number' => $job->customer->phone]),
+                ]),
+            ],
         ]);
     }
 
@@ -93,7 +107,7 @@ class BookingController extends Controller
     {
         return RepairJob::query()
             ->where('reference', $reference)
-            ->with(['customer', 'deviceModel', 'items', 'collectionAddress', 'returnAddress', 'availabilityWindow'])
+            ->with(['customer', 'deviceModel', 'items', 'collectionAddress', 'returnAddress', 'availabilityWindow', 'lead'])
             ->firstOrFail();
     }
 

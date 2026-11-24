@@ -6,6 +6,7 @@
  * components and these Alpine helpers share one Alpine instance.
  */
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import { cookieBanner, startTracking } from './tracking';
 
 /**
  * Mobile navigation drawer: traps focus loosely, closes on Escape and locks page scroll.
@@ -114,4 +115,7 @@ Alpine.data('copyLink', (url) => ({
     },
 }));
 
+Alpine.data('cookieBanner', cookieBanner);
+
+startTracking();
 Livewire.start();

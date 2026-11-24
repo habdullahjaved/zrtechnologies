@@ -3,7 +3,7 @@
     $lines = $this->summaryLines;
 @endphp
 
-<div id="booking" class="scroll-mt-28" x-data x-on:booking-step.window="$el.scrollIntoView({ behavior: 'smooth', block: 'start' })">
+<div id="booking" class="scroll-mt-28" x-data x-init="window.zrTrack?.('booking_step_' + $wire.step, { step: $wire.step }); $watch('$wire.step', (step) => window.zrTrack?.('booking_step_' + step, { step }))" x-on:booking-step.window="$el.scrollIntoView({ behavior: 'smooth', block: 'start' })">
     {{-- Progress --}}
     <nav aria-label="Booking progress" class="mb-6">
         <ol class="grid grid-cols-6 gap-1.5 sm:gap-2">
@@ -106,63 +106,101 @@
                 @endif
             @endif
 
-            {{-- Step 2: device --}}
+            {{-- Step 2: device (search, popular models, or the full list in a compact dropdown) --}}
             @if ($step === 2)
+                @php
+                    $allModels = $this->models;
+                    $popularModels = $allModels->where('is_popular', true)->take(8);
+                    $searchIndex = $allModels->map(fn ($deviceModel) => ['slug' => $deviceModel->slug, 'name' => $deviceModel->name])->values();
+                @endphp
+
                 <h2 class="text-2xl font-bold">Which iPhone do you have?</h2>
                 <p class="mt-2">Not sure? Open Settings › General › About on the phone.</p>
 
-                <form wire:submit="submitDevice" class="mt-6" novalidate>
-                    <div x-data="{ search: '' }">
-                        <label for="booking-model-search" class="mb-1.5 block text-sm font-semibold text-navy-900">Search models</label>
+                <div class="mt-6" x-data="{ search: '', models: {{ \Illuminate\Support\Js::from($searchIndex) }}, get matches() { const term = this.search.toLowerCase().replace(/iphone/g, '').trim(); return term === '' ? [] : this.models.filter(m => m.name.toLowerCase().includes(term)).slice(0, 8); } }">
+                    <label for="booking-model-search" class="mb-1.5 block text-sm font-semibold text-navy-900">Search for your model</label>
+                    <div class="relative">
+                        <x-heroicon-o-magnifying-glass class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                         <input
                             id="booking-model-search"
                             type="search"
                             x-model="search"
-                            placeholder="e.g. 15 Pro"
-                            class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-navy-950 shadow-sm placeholder:text-slate-400 focus:border-royal-600 focus:ring-2 focus:ring-sky-400/40 sm:max-w-sm"
+                            autocomplete="off"
+                            placeholder="e.g. 15 Pro Max"
+                            class="block w-full rounded-xl border border-slate-300 bg-white py-3.5 pr-4 pl-11 text-base text-navy-950 shadow-sm placeholder:text-slate-400 focus:border-royal-600 focus:ring-2 focus:ring-sky-400/40"
                         >
+                    </div>
 
-                        <fieldset class="mt-5">
-                            <legend class="sr-only">iPhone model</legend>
-                            <ul class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
-                                @foreach ($this->models as $deviceModel)
-                                    <li
-                                        wire:key="model-{{ $deviceModel->id }}"
-                                        x-show="search === '' || {{ \Illuminate\Support\Js::from(mb_strtolower($deviceModel->name)) }}.includes(search.toLowerCase().trim())"
-                                    >
-                                        <label @class([
-                                            'flex h-full cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-3 text-sm font-semibold transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-sky-400',
-                                            'border-royal-600 bg-ice-50 text-navy-900 ring-1 ring-royal-600' => $model?->id === $deviceModel->id,
-                                            'border-ice-100 bg-white text-navy-900 hover:border-sky-200' => $model?->id !== $deviceModel->id,
-                                        ])>
-                                            <input type="radio" name="model" value="{{ $deviceModel->slug }}" wire:click="chooseModel('{{ $deviceModel->slug }}')" @checked($model?->id === $deviceModel->id) class="sr-only">
-                                            <x-heroicon-o-device-phone-mobile class="size-5 shrink-0 text-royal-600" aria-hidden="true" />
-                                            {{ $deviceModel->name }}
-                                        </label>
+                    {{-- Search results --}}
+                    <ul x-show="search.trim() !== ''" x-cloak class="mt-3 grid gap-2 sm:grid-cols-2" aria-live="polite">
+                        <template x-for="match in matches" :key="match.slug">
+                            <li>
+                                <button type="button" @click="$wire.chooseModel(match.slug)" class="flex w-full items-center gap-2.5 rounded-xl border border-ice-100 bg-white px-4 py-3.5 text-left font-semibold text-navy-900 hover:border-royal-600 hover:bg-ice-50 focus-visible:outline-2 focus-visible:outline-sky-400">
+                                    <x-heroicon-o-device-phone-mobile class="size-5 shrink-0 text-royal-600" aria-hidden="true" />
+                                    <span x-text="match.name"></span>
+                                </button>
+                            </li>
+                        </template>
+                        <li x-show="matches.length === 0" class="rounded-xl bg-ice-50 px-4 py-3 text-sm sm:col-span-2">No model matches. Try just the number, e.g. "15", or choose from the list below.</li>
+                    </ul>
+
+                    {{-- Popular models --}}
+                    @if ($popularModels->isNotEmpty())
+                        <div x-show="search.trim() === ''">
+                            <p class="mt-6 text-sm font-semibold text-navy-900">Popular models</p>
+                            <ul class="mt-2.5 flex flex-wrap gap-2">
+                                @foreach ($popularModels as $deviceModel)
+                                    <li wire:key="popular-{{ $deviceModel->id }}">
+                                        <button
+                                            type="button"
+                                            wire:click="chooseModel('{{ $deviceModel->slug }}')"
+                                            @class([
+                                                'rounded-full border px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-sky-400',
+                                                'border-royal-600 bg-royal-600 text-white' => $model?->id === $deviceModel->id,
+                                                'border-ice-100 bg-white text-navy-900 hover:border-royal-600' => $model?->id !== $deviceModel->id,
+                                            ])
+                                        >{{ $deviceModel->name }}</button>
                                     </li>
                                 @endforeach
                             </ul>
-                        </fieldset>
+                        </div>
+                    @endif
+
+                    {{-- Every model, in one compact dropdown --}}
+                    <div class="mt-6">
+                        <label for="booking-model-list" class="mb-1.5 block text-sm font-semibold text-navy-900">Or choose from all models</label>
+                        <select
+                            id="booking-model-list"
+                            @change="if ($event.target.value) { $wire.chooseModel($event.target.value) }"
+                            class="block w-full rounded-xl border border-slate-300 bg-white py-3.5 pr-10 pl-4 text-base text-navy-950 shadow-sm focus:border-royal-600 focus:ring-2 focus:ring-sky-400/40"
+                        >
+                            <option value="">Select your iPhone…</option>
+                            @foreach ($allModels->groupBy(fn ($deviceModel) => $deviceModel->family ?? 'Other') as $family => $familyModels)
+                                <optgroup label="{{ $family }}">
+                                    @foreach ($familyModels as $deviceModel)
+                                        <option value="{{ $deviceModel->slug }}" @selected($model?->id === $deviceModel->id)>{{ $deviceModel->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
                     </div>
+
                     @error('model')
                         <p class="mt-3 text-sm font-medium text-danger-600">{{ $message }}</p>
                     @enderror
 
-                    <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                        <x-form.input name="colour" label="Colour" wire:model="colour" maxlength="40" placeholder="e.g. Midnight" optional />
-                        <x-form.input name="storage" label="Storage" wire:model="storage" maxlength="20" placeholder="e.g. 128GB" list="booking-storage-options" optional />
-                        <datalist id="booking-storage-options">
-                            @foreach (['64GB', '128GB', '256GB', '512GB', '1TB', '2TB'] as $size)
-                                <option value="{{ $size }}"></option>
-                            @endforeach
-                        </datalist>
+                    <div wire:loading.flex wire:target="chooseModel" class="mt-4 items-center gap-2 text-sm font-semibold text-royal-600">
+                        <x-heroicon-o-arrow-path class="size-4 animate-spin" aria-hidden="true" />
+                        Loading repairs…
                     </div>
+                </div>
 
-                    <div class="mt-8 flex flex-wrap justify-between gap-3">
-                        <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
-                        <x-ui.button type="submit" size="lg">Continue</x-ui.button>
-                    </div>
-                </form>
+                <div class="sticky bottom-0 z-10 -mx-5 mt-8 flex justify-between gap-3 border-t border-ice-100 bg-white/95 px-5 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+                    <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
+                    @if ($model)
+                        <x-ui.button size="lg" wire:click="submitDevice">Continue with {{ $model->name }}</x-ui.button>
+                    @endif
+                </div>
             @endif
 
             {{-- Step 3: repairs --}}
@@ -254,7 +292,7 @@
                         </div>
                     @endif
 
-                    <div class="mt-8 flex flex-wrap justify-between gap-3">
+                    <div class="sticky bottom-0 z-10 -mx-5 mt-8 flex flex-wrap justify-between gap-3 border-t border-ice-100 bg-white/95 px-5 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
                         <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
                         <x-ui.button type="submit" size="lg">Continue</x-ui.button>
                     </div>
@@ -329,7 +367,7 @@
                         </div>
                     @endif
 
-                    <div class="mt-8 flex flex-wrap justify-between gap-3">
+                    <div class="sticky bottom-0 z-10 -mx-5 mt-8 flex flex-wrap justify-between gap-3 border-t border-ice-100 bg-white/95 px-5 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
                         <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
                         <x-ui.button type="submit" size="lg">Continue</x-ui.button>
                     </div>
@@ -356,6 +394,18 @@
                             <button type="button" wire:click="goToStep(1)" class="text-sm font-semibold text-royal-600 hover:underline">Change</button>
                         </p>
                     </div>
+                    <details class="group rounded-xl border border-ice-100 px-4 py-3 sm:col-span-2" @if ($colour || $storage) open @endif>
+                        <summary class="cursor-pointer text-sm font-semibold text-royal-600">Add your iPhone’s colour and storage (optional)</summary>
+                        <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                            <x-form.input name="colour" label="Colour" wire:model="colour" maxlength="40" placeholder="e.g. Midnight" optional />
+                            <x-form.input name="storage" label="Storage" wire:model="storage" maxlength="20" placeholder="e.g. 128GB" list="booking-storage-options" optional />
+                            <datalist id="booking-storage-options">
+                                @foreach (['64GB', '128GB', '256GB', '512GB', '1TB', '2TB'] as $size)
+                                    <option value="{{ $size }}"></option>
+                                @endforeach
+                            </datalist>
+                        </div>
+                    </details>
                     <x-form.textarea name="notes" label="Anything we should know?" wire:model="notes" rows="3" class="sm:col-span-2" help="e.g. parking, a gate code, or more about the fault." optional />
 
                     <x-ui.alert tone="info" title="Your passcode and data" class="sm:col-span-2">
@@ -389,7 +439,7 @@
                         @endif
                     </p>
 
-                    <div class="mt-2 flex flex-wrap justify-between gap-3 sm:col-span-2">
+                    <div class="mt-2 sm:col-span-2 sticky bottom-0 z-10 -mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-ice-100 bg-white/95 px-5 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
                         <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
                         <x-ui.button type="submit" size="lg">Review booking</x-ui.button>
                     </div>
@@ -403,7 +453,7 @@
 
                 <dl class="mt-6 divide-y divide-ice-100 rounded-2xl border border-ice-100">
                     @foreach ([
-                        ['label' => 'Device', 'value' => collect([$model->name, $colour, $storage])->filter()->implode(', '), 'step' => 2],
+                        ['label' => 'Device', 'value' => collect([$model->name, $colour, $storage])->filter()->implode(', '), 'step' => $colour || $storage ? 5 : 2],
                         ['label' => 'Repairs', 'value' => collect($lines)->map(fn ($line) => $line['label'].($line['quality'] ? ' ('.$line['quality'].')' : '').': '.$line['price'])->implode("\n"), 'step' => 3],
                         ['label' => 'Collection', 'value' => $chosenSlot?->label() ?? '', 'step' => 4],
                         ['label' => 'Address', 'value' => collect([$line1, $line2, $town, $postcode])->filter()->implode(', '), 'step' => 5],
@@ -425,7 +475,7 @@
                     <p class="mt-3 text-sm">{{ $settings->payment_note }}</p>
                 </div>
 
-                <form wire:submit="confirm" class="mt-8 flex flex-wrap items-center justify-between gap-3" novalidate>
+                <form wire:submit="confirm" class="mt-8 sticky bottom-0 z-10 -mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-ice-100 bg-white/95 px-5 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none" novalidate>
                     <x-form.honeypot />
                     <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
                     <x-ui.button type="submit" size="lg" wire:loading.attr="disabled" wire:target="confirm">

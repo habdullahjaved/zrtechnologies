@@ -6,6 +6,7 @@ use App\Filament\Resources\Authors\AuthorResource;
 use App\Filament\Resources\AvailabilityOverrides\AvailabilityOverrideResource;
 use App\Filament\Resources\AvailabilityWindows\AvailabilityWindowResource;
 use App\Filament\Resources\BlackoutDates\BlackoutDateResource;
+use App\Filament\Resources\ConsentRecords\ConsentRecordResource;
 use App\Filament\Resources\Customers\CustomerResource;
 use App\Filament\Resources\DeviceModels\DeviceModelResource;
 use App\Filament\Resources\Faqs\FaqResource;
@@ -25,6 +26,7 @@ use App\Filament\Resources\Reviews\ReviewResource;
 use App\Filament\Resources\ServiceAreas\ServiceAreaResource;
 use App\Filament\Resources\ServiceCategories\ServiceCategoryResource;
 use App\Filament\Resources\Services\ServiceResource;
+use App\Filament\Resources\TrackingEvents\TrackingEventResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Videos\VideoResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
@@ -238,6 +240,8 @@ return [
             RedirectResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
             MenuItemResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
             NotFoundLogResource::class => ['viewAny', 'view', 'delete'],
+            TrackingEventResource::class => ['viewAny', 'view', 'update'],
+            ConsentRecordResource::class => ['viewAny', 'view'],
             RoleResource::class => [
                 'viewAny',
                 'view',

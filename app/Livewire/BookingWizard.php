@@ -261,6 +261,7 @@ class BookingWizard extends Component
         ), $attribution->current(request()));
 
         $this->outOfAreaReference = $lead->reference;
+        $this->dispatch('zr-track', name: 'generate_lead', params: ['event_id' => $lead->event_id, 'lead_type' => $lead->type->value]);
     }
 
     public function changePostcode(): void
@@ -286,6 +287,9 @@ class BookingWizard extends Component
             $this->qualities = [];
             unset($this->selectedModel, $this->prices);
         }
+
+        // One tap is enough: picking a model moves straight on to the repairs.
+        $this->submitDevice();
     }
 
     public function submitDevice(): void
@@ -440,6 +444,8 @@ class BookingWizard extends Component
             'line2' => ['nullable', 'string', 'max:120'],
             'town' => ['required', 'string', 'max:80'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'colour' => ['nullable', 'string', 'max:40'],
+            'storage' => ['nullable', 'string', 'max:20'],
             'acceptTerms' => ['accepted'],
             'startStraightAway' => ['boolean'],
             'marketingConsent' => ['boolean'],

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CachePublicPage;
 use App\Http\Middleware\CaptureAttribution;
+use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\SecurityHeaders;
 use App\Services\Seo\RedirectManager;
 use Illuminate\Foundation\Application;
@@ -26,8 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'page-cache' => CachePublicPage::class,
         ]);
 
-        // Analytics cookies are set by Google and Meta scripts, not Laravel, so they are not encrypted.
-        $middleware->encryptCookies(except: ['_ga', '_fbp', '_fbc']);
+        // Cookies set by Google and Meta scripts, and the consent cookie our own script reads, are not encrypted.
+        $middleware->web(replace: [
+            Illuminate\Cookie\Middleware\EncryptCookies::class => EncryptCookies::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

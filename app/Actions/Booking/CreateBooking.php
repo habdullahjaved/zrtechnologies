@@ -220,7 +220,8 @@ final class CreateBooking
         ];
 
         if ($partialLead !== null && $partialLead->exists && $partialLead->is_partial) {
-            $partialLead->fill($attributes)->save();
+            // Keep the attribution from when they started; take the cookie choice they have now.
+            $partialLead->fill([...$attributes, 'consent' => $attribution->consent ?: $partialLead->consent])->save();
 
             return $partialLead;
         }

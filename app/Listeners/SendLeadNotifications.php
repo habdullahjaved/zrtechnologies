@@ -26,6 +26,11 @@ class SendLeadNotifications
     {
         $lead = $event->lead;
 
+        // Call and WhatsApp clicks are logged as leads for reporting, without emails or alerts.
+        if ($lead->type->isClick()) {
+            return;
+        }
+
         if (! $lead->is_partial && filled($lead->email)) {
             Notification::route('mail', $lead->email)->notify(new EnquiryReceived($lead));
         }

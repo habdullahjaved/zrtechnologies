@@ -1,4 +1,7 @@
 <x-layouts.app :seo="$seo">
+    {{-- Booking conversion for the browser tags (sent once, same event ID as the server-side send). --}}
+    <div hidden data-zr-event="{{ json_encode($trackingEvent) }}"></div>
+
     <x-site.page-header title="You’re booked in" :breadcrumbs="[['label' => 'Book a repair', 'url' => route('booking.create')], ['label' => 'Booking confirmed']]">
         Thanks, {{ $job->customer->first_name }}. Your booking reference is <strong class="text-white">{{ $job->reference }}</strong>.
         @if ($job->customer->email)

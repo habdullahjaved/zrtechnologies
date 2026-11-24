@@ -26,9 +26,12 @@ final class CaptureLead
         private readonly FindOrCreateCustomer $customers,
     ) {}
 
-    public function handle(LeadData $data, AttributionData $attribution): Lead
+    /**
+     * @param  string|null  $eventId  The browser's event ID, so the browser and server conversions are counted once.
+     */
+    public function handle(LeadData $data, AttributionData $attribution, ?string $eventId = null): Lead
     {
-        return DB::transaction(function () use ($data, $attribution): Lead {
+        return DB::transaction(function () use ($data, $attribution, $eventId): Lead {
             $customer = filled($data->name) && (filled($data->email) || filled($data->phone))
                 ? $this->customers->handle(...$this->splitName((string) $data->name), email: $data->email, phone: $data->phone)
                 : null;
@@ -45,7 +48,7 @@ final class CaptureLead
                 'status' => LeadStatus::New,
                 'service_category_id' => ServiceCategory::query()->where('slug', ServiceCategory::IPHONE_REPAIR)->value('id'),
                 'customer_id' => $customer?->getKey(),
-                'event_id' => (string) Str::uuid(),
+                'event_id' => $eventId ?? (string) Str::uuid(),
             ]);
 
             event(new LeadCaptured($lead));

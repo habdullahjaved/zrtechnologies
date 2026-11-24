@@ -6,6 +6,7 @@ use App\Actions\Jobs\ChangeJobStatus;
 use App\Enums\JobStatus;
 use App\Models\RepairJob;
 use App\Models\User;
+use App\Settings\SocialSettings;
 use App\Support\Messaging\MessageRenderer;
 use App\Support\Messaging\MessageTemplateCatalogue;
 use App\Support\Messaging\MessageVariables;
@@ -124,6 +125,21 @@ final class RepairJobActions
             ->url(fn (RepairJob $record): string => Phone::whatsAppUrl((string) $record->customer->phone, self::whatsAppMessage($record)), shouldOpenInNewTab: true);
     }
 
+    /**
+     * A prefilled WhatsApp message asking for a Google review, once the repair is back with the customer.
+     */
+    public static function askForReview(): Action
+    {
+        return Action::make('askForReview')
+            ->label('Ask for a review (WhatsApp)')
+            ->icon(Heroicon::OutlinedStar)
+            ->color('gray')
+            ->visible(fn (RepairJob $record): bool => filled($record->customer->phone)
+                && in_array($record->status, [JobStatus::Returned, JobStatus::Completed], true)
+                && filled(app(SocialSettings::class)->google_review_url))
+            ->url(fn (RepairJob $record): string => Phone::whatsAppUrl((string) $record->customer->phone, self::reviewMessage($record)), shouldOpenInNewTab: true);
+    }
+
     public static function directions(): Action
     {
         return Action::make('directions')
@@ -141,6 +157,24 @@ final class RepairJobActions
             ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
             ->color('gray')
             ->url(fn (RepairJob $record): string => MessageVariables::trackUrl($record), shouldOpenInNewTab: true);
+    }
+
+    private static function reviewMessage(RepairJob $job): string
+    {
+        $job->loadMissing('deviceModel');
+        $renderer = app(MessageRenderer::class);
+        $template = $renderer->template(MessageTemplateCatalogue::WHATSAPP_REVIEW_REQUEST);
+
+        if ($template === null) {
+            return '';
+        }
+
+        return $renderer->render($template->body, [
+            'customer_first_name' => $job->customer->first_name,
+            'staff_first_name' => str((string) auth()->user()?->name)->before(' ')->toString(),
+            'device' => $job->deviceModel->name ?? 'iPhone',
+            'review_url' => route('reviews.leave'),
+        ], escape: false);
     }
 
     private static function whatsAppMessage(RepairJob $job): string

@@ -5,6 +5,16 @@
 
     RewriteEngine On
 
+    # Live site only: one address, https://zrtechnologiesltd.com (no www, always HTTPS).
+    # Hostinger's proxy reports HTTPS in X-Forwarded-Proto. Local addresses are not affected.
+    RewriteCond %{HTTP_HOST} ^www\.zrtechnologiesltd\.com$ [NC]
+    RewriteRule ^ https://zrtechnologiesltd.com%{REQUEST_URI} [L,R=301]
+
+    RewriteCond %{HTTP_HOST} ^zrtechnologiesltd\.com$ [NC]
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://zrtechnologiesltd.com%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -22,4 +32,22 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# Long browser caching for fingerprinted build files, fonts and images.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/rss+xml application/javascript text/javascript application/json image/svg+xml
 </IfModule>

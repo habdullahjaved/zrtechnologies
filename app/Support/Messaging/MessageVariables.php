@@ -56,6 +56,7 @@ final class MessageVariables
             'collection_fee' => $job->collection_fee_pence > 0 ? Money::format($job->collection_fee_pence) : 'Free',
             'final_price' => $job->final_price_pence !== null ? Money::format($job->final_price_pence) : null,
             'warranty_expires' => $job->warranty_expires_at?->format('j F Y'),
+            'review_url' => route('reviews.leave'),
             'status' => $job->status->customerLabel(),
             'status_description' => $job->status->customerDescription(),
             'payment_note' => $this->booking->payment_note,

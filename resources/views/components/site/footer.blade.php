@@ -119,6 +119,7 @@
                         @foreach ($legalLinks as $link)
                             <li><a href="{{ $link['url'] }}" class="hover:text-white">{{ $link['label'] }}</a></li>
                         @endforeach
+                        <li><button type="button" x-data @click="$dispatch('open-cookie-settings')" class="hover:text-white">Cookie settings</button></li>
                     </ul>
                 </nav>
             @endif

@@ -5,17 +5,20 @@ use App\Http\Controllers\AreasController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\ConsentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HowItWorksController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\OfflineConversionExportController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RepairController;
 use App\Http\Controllers\RepairPricesController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TrackEventController;
 use App\Http\Controllers\TrackRepairController;
 use App\Http\Controllers\VideoController;
 use App\Support\Seo\SeoData;
@@ -73,6 +76,15 @@ Route::get('/reviews/leave', [ReviewController::class, 'leave'])->name('reviews.
 | Machine endpoints.
 */
 Route::get('/robots.txt', RobotsController::class)->name('robots');
+
+// Cookie choices and tracked clicks from the browser script.
+Route::post('/consent', ConsentController::class)->middleware('throttle:20,1')->name('consent.store');
+Route::post('/t/e', TrackEventController::class)->middleware('throttle:30,1')->name('tracking.event');
+
+// Completed repairs for Google Ads' scheduled offline-conversion upload (token-protected).
+Route::get('/exports/offline-conversions/google-ads.csv', OfflineConversionExportController::class)
+    ->middleware('throttle:30,1')
+    ->name('exports.offline-conversions');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/sitemaps/{type}.xml', [SitemapController::class, 'show'])->name('sitemaps.show');
 

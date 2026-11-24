@@ -26,6 +26,9 @@ class NotificationSettings extends Settings
 
     public ?string $telegram_chat_id;
 
+    /** Email customers a Google review request when their repair is completed. */
+    public bool $send_review_requests;
+
     public static function group(): string
     {
         return 'notifications';

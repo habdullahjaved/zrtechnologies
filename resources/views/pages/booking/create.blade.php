@@ -1,5 +1,5 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs" :compact="true">
         {{ $page->intro }}
     </x-site.page-header>
 
