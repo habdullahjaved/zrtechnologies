@@ -63,7 +63,7 @@ nano .env
 | `APP_URL` | `https://zrtechnologiesltd.com` |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | from step 1 (port 3306) |
 | `MAIL_MAILER` | `smtp` |
-| `MAIL_HOST` / `MAIL_PORT` / `MAIL_ENCRYPTION` | `smtp.hostinger.com` / `465` / `ssl` |
+| `MAIL_SCHEME` / `MAIL_HOST` / `MAIL_PORT` | `smtps` / `smtp.hostinger.com` / `465` |
 | `MAIL_USERNAME`, `MAIL_PASSWORD` | the mailbox from step 1 |
 | `MAIL_FROM_ADDRESS` | the same mailbox |
 | `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` | the owner's account (the password is only used the first time) |
