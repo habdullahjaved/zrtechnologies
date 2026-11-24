@@ -34,3 +34,6 @@ Thumbs.db
 
 # Static analysis cache
 /storage/framework/cache/phpstan
+
+# Upload packages built for Hostinger
+/deploy/release

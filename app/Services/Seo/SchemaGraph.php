@@ -107,6 +107,10 @@ class SchemaGraph
             $node['vatID'] = $this->business->vat_number;
         }
 
+        if (filled($this->social->google_business_profile)) {
+            $node['hasMap'] = $this->social->google_business_profile;
+        }
+
         if (($sameAs = $this->social->sameAs()) !== []) {
             $node['sameAs'] = $sameAs;
         }

@@ -64,7 +64,10 @@ class SeoHead extends Component
             return $title;
         }
 
-        return "{$title} {$this->site->title_separator} {$this->site->site_name}";
+        $full = "{$title} {$this->site->title_separator} {$this->site->site_name}";
+
+        // Google cuts long titles: past 70 characters keep the page's own words rather than the brand.
+        return mb_strlen($full) > 70 ? $title : $full;
     }
 
     /**
