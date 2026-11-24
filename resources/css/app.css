@@ -127,6 +127,21 @@
         @apply transition-colors;
     }
 
+    /* Everything clickable shows the hand cursor (Tailwind 4 resets buttons to the arrow). */
+    button:not(:disabled),
+    [role='button'],
+    select,
+    summary,
+    label:has(input:not(:disabled)),
+    input[type='checkbox']:not(:disabled),
+    input[type='radio']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    button:disabled {
+        cursor: not-allowed;
+    }
+
     :focus-visible {
         @apply outline-2 outline-offset-2 outline-sky-400;
     }
