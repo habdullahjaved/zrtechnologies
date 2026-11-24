@@ -14,6 +14,23 @@ This guide puts the site live at **https://zrtechnologiesltd.com** on a Hostinge
 
 The application lives **outside** `public_html`, so `.env`, `storage` and the code can never be downloaded. Only the `public` folder is web-facing.
 
+**Easiest: upload the package with the File Manager.** On your computer, build the package (code plus the built front-end files):
+
+```bash
+npm run build
+git archive --format=tar -o deploy/release/zrtechnologies.tar HEAD && tar -rf deploy/release/zrtechnologies.tar public/build
+```
+
+(or use the ready-made `deploy/release/zrtechnologies-upload.zip`). In hPanel → File Manager, open `domains/zrtechnologiesltd.com`, create a folder **`app`**, upload the zip into it and choose **Extract**. Then, over SSH:
+
+```bash
+cd ~/domains/zrtechnologiesltd.com/app
+php -v                                       # must say 8.4 or 8.5; if not, change it in hPanel and reconnect
+composer2 install --no-dev --optimize-autoloader
+```
+
+**Or with git**, if the project is on GitHub:
+
 ```bash
 ssh -p PORT USER@HOST
 cd ~/domains/zrtechnologiesltd.com
