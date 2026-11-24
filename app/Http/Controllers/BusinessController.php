@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\Seo\SeoData;
+use App\Enums\SystemPage;
+use App\Models\Page;
+use App\Services\Seo\SeoResolver;
+use App\Support\Content\BlockRenderer;
 use Illuminate\Contracts\View\View;
 
 /**
@@ -10,15 +13,16 @@ use Illuminate\Contracts\View\View;
  */
 class BusinessController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(SeoResolver $seo, BlockRenderer $renderer): View
     {
+        $page = Page::system(SystemPage::Business);
+        $breadcrumbs = [['label' => 'Business repairs']];
+
         return view('pages.business', [
-            'seo' => new SeoData(
-                title: 'Business iPhone Repairs',
-                description: 'iPhone repairs for businesses, schools and organisations across East Lancashire, collected from your site. Tell us what you need and we will put together a quote.',
-                image: 'images/og/og-business.jpg',
-                imageAlt: 'Business iPhone repairs from ZR Technologies',
-            ),
+            'seo' => $seo->forPage($page, $breadcrumbs),
+            'page' => $page,
+            'content' => $renderer->render($page->blocks),
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 }

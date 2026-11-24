@@ -1,6 +1,6 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header title="iPhone Repair Prices" :breadcrumbs="[['label' => 'Repair prices']]">
-        Choose your iPhone to see the price of every repair. The price you see is the price you pay, and if anything changes after diagnosis we ask you first.
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+        {{ $page->intro }}
     </x-site.page-header>
 
     <x-ui.section tone="ice" spacing="tight">

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JobStatus;
+use App\Enums\SystemPage;
+use App\Models\Page;
 use App\Models\RepairJob;
+use App\Services\Seo\SeoResolver;
 use App\Settings\BusinessSettings;
 use App\Support\Phone;
 use App\Support\Seo\SeoData;
@@ -15,15 +18,15 @@ use Illuminate\Contracts\View\View;
  */
 class TrackRepairController extends Controller
 {
-    public function index(): View
+    public function index(SeoResolver $seo): View
     {
+        $page = Page::system(SystemPage::TrackRepair);
+        $breadcrumbs = [['label' => 'Track a repair']];
+
         return view('pages.track-repair.index', [
-            'seo' => new SeoData(
-                title: 'Track Your iPhone Repair',
-                description: 'Check the progress of your iPhone repair with your booking reference and postcode.',
-                image: 'images/og/og-track-repair.jpg',
-                imageAlt: 'Track your iPhone repair',
-            ),
+            'seo' => $seo->forPage($page, $breadcrumbs),
+            'page' => $page,
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 

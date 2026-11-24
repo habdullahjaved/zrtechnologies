@@ -2,20 +2,31 @@
 
 declare(strict_types=1);
 use App\Filament\Resources\Activities\ActivityResource;
+use App\Filament\Resources\Authors\AuthorResource;
 use App\Filament\Resources\AvailabilityOverrides\AvailabilityOverrideResource;
 use App\Filament\Resources\AvailabilityWindows\AvailabilityWindowResource;
 use App\Filament\Resources\BlackoutDates\BlackoutDateResource;
 use App\Filament\Resources\Customers\CustomerResource;
 use App\Filament\Resources\DeviceModels\DeviceModelResource;
+use App\Filament\Resources\Faqs\FaqResource;
 use App\Filament\Resources\Leads\LeadResource;
+use App\Filament\Resources\MenuItems\MenuItemResource;
 use App\Filament\Resources\MessageTemplates\MessageTemplateResource;
+use App\Filament\Resources\NotFoundLogs\NotFoundLogResource;
+use App\Filament\Resources\Pages\PageResource;
 use App\Filament\Resources\PartQualities\PartQualityResource;
+use App\Filament\Resources\PostCategories\PostCategoryResource;
+use App\Filament\Resources\Posts\PostResource;
+use App\Filament\Resources\Redirects\RedirectResource;
 use App\Filament\Resources\RepairJobs\RepairJobResource;
 use App\Filament\Resources\RepairPrices\RepairPriceResource;
 use App\Filament\Resources\RepairTypes\RepairTypeResource;
+use App\Filament\Resources\Reviews\ReviewResource;
 use App\Filament\Resources\ServiceAreas\ServiceAreaResource;
 use App\Filament\Resources\ServiceCategories\ServiceCategoryResource;
+use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Resources\Videos\VideoResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -216,6 +227,17 @@ return [
             CustomerResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
             RepairJobResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'viewAll', 'viewFinancials'],
             MessageTemplateResource::class => ['viewAny', 'view', 'update'],
+            PageResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            ServiceResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            PostResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            PostCategoryResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            AuthorResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            FaqResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            VideoResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            ReviewResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            RedirectResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            MenuItemResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            NotFoundLogResource::class => ['viewAny', 'view', 'delete'],
             RoleResource::class => [
                 'viewAny',
                 'view',

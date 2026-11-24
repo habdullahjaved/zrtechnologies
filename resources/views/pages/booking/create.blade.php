@@ -1,6 +1,6 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header title="Book Your iPhone Repair" :breadcrumbs="[['label' => 'Book a repair']]">
-        Tell us where you are, what needs fixing and when suits you. It takes about two minutes, and you pay nothing until your iPhone comes back.
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+        {{ $page->intro }}
     </x-site.page-header>
 
     <x-ui.section tone="ice" spacing="tight">

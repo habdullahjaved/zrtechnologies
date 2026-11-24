@@ -20,14 +20,14 @@ class CoverageSeeder extends Seeder
     /**
      * Core towns are active; Preston, Burnley and Chorley are optional and start switched off.
      *
-     * @var list<array{name: string, town: string, districts: list<string>, lat: float, lng: float, fee: int, active: bool, summary: string}>
+     * @var list<array{name: string, slug?: string, town: string, districts: list<string>, lat: float, lng: float, fee: int, active: bool, summary: string}>
      */
     private const array AREAS = [
         ['name' => 'Blackburn', 'town' => 'Blackburn', 'districts' => ['BB1', 'BB2'], 'lat' => 53.748600, 'lng' => -2.487700, 'fee' => 0, 'active' => true,
             'summary' => 'Blackburn town centre and the surrounding areas, including Wilpshire, Rishton, Feniscowles and Mellor Brook.'],
         ['name' => 'Darwen', 'town' => 'Darwen', 'districts' => ['BB3'], 'lat' => 53.698000, 'lng' => -2.464500, 'fee' => 0, 'active' => true,
             'summary' => 'Darwen and Hoddlesden.'],
-        ['name' => 'Accrington & Oswaldtwistle', 'town' => 'Accrington', 'districts' => ['BB5'], 'lat' => 53.753400, 'lng' => -2.364000, 'fee' => 500, 'active' => true,
+        ['name' => 'Accrington & Oswaldtwistle', 'slug' => 'accrington', 'town' => 'Accrington', 'districts' => ['BB5'], 'lat' => 53.753400, 'lng' => -2.364000, 'fee' => 500, 'active' => true,
             'summary' => 'Accrington, Oswaldtwistle, Church, Clayton-le-Moors and Huncoat.'],
         ['name' => 'Great Harwood', 'town' => 'Great Harwood', 'districts' => ['BB6'], 'lat' => 53.785600, 'lng' => -2.408500, 'fee' => 500, 'active' => true,
             'summary' => 'Great Harwood and Langho.'],
@@ -75,7 +75,7 @@ class CoverageSeeder extends Seeder
     public function run(): void
     {
         foreach (self::AREAS as $index => $area) {
-            ServiceArea::query()->firstOrCreate(['slug' => Str::slug($area['name'])], [
+            ServiceArea::query()->firstOrCreate(['slug' => $area['slug'] ?? Str::slug($area['name'])], [
                 'name' => $area['name'],
                 'town' => $area['town'],
                 'county' => 'Lancashire',

@@ -17,5 +17,8 @@ Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')
     ->everyMinute()
     ->withoutOverlapping(5);
 
+// Publish scheduled pages and posts (and refresh cached pages) once their date passes.
+Schedule::command('content:publish-scheduled')->everyFiveMinutes()->withoutOverlapping();
+
 // Remove expired password-reset tokens.
 Schedule::command('auth:clear-resets')->daily()->at('03:30');

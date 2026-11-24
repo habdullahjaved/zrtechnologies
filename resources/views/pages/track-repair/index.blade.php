@@ -1,6 +1,6 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header title="Track Your Repair" :breadcrumbs="[['label' => 'Track a repair']]">
-        Enter the reference from your confirmation email and the postcode we collected from.
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+        {{ $page->intro }}
     </x-site.page-header>
 
     <x-ui.section tone="ice" spacing="tight">

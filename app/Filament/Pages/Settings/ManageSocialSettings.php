@@ -38,6 +38,8 @@ class ManageSocialSettings extends BaseSettingsPage
                 ->columnSpanFull()
                 ->schema([
                     $this->urlField('google_business_profile', 'Google Business Profile', 'https://maps.app.goo.gl/…'),
+                    $this->urlField('google_review_url', 'Google review link', 'https://g.page/r/…/review')
+                        ->helperText('In your Google Business Profile, choose "Ask for reviews" and paste the link here. Used by the "Leave a review" buttons and the short link /reviews/leave.'),
                 ]),
             Section::make('Social networks')
                 ->columns(2)

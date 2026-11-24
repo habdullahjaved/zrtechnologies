@@ -59,4 +59,21 @@ return [
 
     'trusted_proxies' => env('TRUSTED_PROXIES'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Full-page cache
+    |--------------------------------------------------------------------------
+    |
+    | Public pages are cached for anonymous visitors (see the CachePublicPage
+    | middleware). The cache is cleared whenever content, prices or settings
+    | are saved, and after each front-end build. The TTL is a safety net.
+    |
+    */
+
+    'page_cache' => [
+        'enabled' => (bool) env('PAGE_CACHE_ENABLED', true),
+        'store' => env('PAGE_CACHE_STORE'),
+        'ttl' => (int) env('PAGE_CACHE_TTL', 21600),
+    ],
+
 ];

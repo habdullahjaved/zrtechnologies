@@ -50,7 +50,27 @@ class RolesAndPermissionsSeeder extends Seeder
         'RepairJob' => [...self::CRUD, 'ViewAll', 'ViewFinancials'],
         'MessageTemplate' => ['ViewAny', 'View', 'Update'],
         'ManageNotificationSettings' => ['View'],
+
+        // Phase 4: content and SEO.
+        'Page' => self::CRUD,
+        'Service' => self::CRUD,
+        'Post' => self::CRUD,
+        'PostCategory' => self::CRUD,
+        'Author' => self::CRUD,
+        'Faq' => self::CRUD,
+        'Video' => self::CRUD,
+        'Review' => self::CRUD,
+        'MenuItem' => self::CRUD,
+        'Redirect' => self::CRUD,
+        'NotFoundLog' => ['ViewAny', 'View', 'Delete'],
     ];
+
+    /**
+     * Website content and SEO: everything the content team manages.
+     *
+     * @var list<string>
+     */
+    private const array CONTENT_SUBJECTS = ['Page', 'Service', 'Post', 'PostCategory', 'Author', 'Faq', 'Video', 'Review', 'MenuItem', 'Redirect'];
 
     /**
      * @var list<string>
@@ -127,6 +147,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'ViewAll:RepairJob', 'ViewFinancials:RepairJob',
                 'ViewAny:MessageTemplate', 'View:MessageTemplate', 'Update:MessageTemplate',
                 'View:ManageNotificationSettings',
+                ...$this->crudFor(self::CONTENT_SUBJECTS),
+                'ViewAny:NotFoundLog', 'View:NotFoundLog', 'Delete:NotFoundLog',
             ],
 
             // Content editors write repair and model descriptions; they cannot change prices.
@@ -139,6 +161,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 'ViewAny:ServiceArea', 'View:ServiceArea',
                 // Wording of customer emails and WhatsApp replies.
                 'ViewAny:MessageTemplate', 'View:MessageTemplate', 'Update:MessageTemplate',
+                // Pages, repair pages, blog, videos, FAQs, reviews, menus and redirects.
+                ...$this->crudFor(self::CONTENT_SUBJECTS),
+                'ViewAny:NotFoundLog', 'View:NotFoundLog', 'Delete:NotFoundLog',
             ],
 
             // Technicians see and progress the jobs assigned to them, without prices.
@@ -155,6 +180,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'ViewAny:Customer', 'View:Customer', 'Create:Customer', 'Update:Customer',
                 'ViewAny:RepairJob', 'View:RepairJob', 'Create:RepairJob', 'Update:RepairJob',
                 'ViewAll:RepairJob', 'ViewFinancials:RepairJob',
+                // Add genuine reviews customers leave elsewhere.
+                'ViewAny:Review', 'View:Review', 'Create:Review', 'Update:Review',
             ],
         ];
     }

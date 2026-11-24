@@ -6,6 +6,7 @@ use App\Filament\NavigationGroup;
 use App\Filament\Resources\DeviceModels\Pages\CreateDeviceModel;
 use App\Filament\Resources\DeviceModels\Pages\EditDeviceModel;
 use App\Filament\Resources\DeviceModels\Pages\ListDeviceModels;
+use App\Filament\Resources\DeviceModels\RelationManagers\RepairPagesRelationManager;
 use App\Filament\Resources\DeviceModels\Schemas\DeviceModelForm;
 use App\Filament\Resources\DeviceModels\Tables\DeviceModelsTable;
 use App\Models\DeviceModel;
@@ -48,6 +49,13 @@ class DeviceModelResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'family'];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RepairPagesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

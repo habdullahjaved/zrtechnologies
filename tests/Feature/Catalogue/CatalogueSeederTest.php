@@ -62,7 +62,7 @@ it('seeds draft service areas, with the optional towns switched off', function (
     expect(ServiceArea::query()->count())->toBe(8)
         ->and(ServiceArea::query()->where('is_draft', false)->exists())->toBeFalse()
         ->and(ServiceArea::query()->listed()->pluck('slug')->all())
-        ->toBe(['blackburn', 'darwen', 'accrington-oswaldtwistle', 'great-harwood', 'clitheroe']);
+        ->toBe(['blackburn', 'darwen', 'accrington', 'great-harwood', 'clitheroe']);
 });
 
 it('seeds a Monday-to-Saturday collection timetable and bank holidays', function () {

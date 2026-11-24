@@ -29,10 +29,16 @@ class Footer extends Component
     /** @var array<string, array{label: string, url: string}> */
     public array $socialLinks;
 
-    /** @var list<array{label: string, url: string, active: bool}> */
+    /** @var list<array{label: string, url: string, active: bool, external: bool}> */
     public array $companyLinks;
 
-    /** @var list<array{label: string, url: string, active: bool}> */
+    /** @var list<array{label: string, url: string}> */
+    public array $serviceLinks;
+
+    /** @var list<array{label: string, url: string}> */
+    public array $areaLinks;
+
+    /** @var list<array{label: string, url: string, active: bool, external: bool}> */
     public array $legalLinks;
 
     public function __construct(
@@ -49,6 +55,8 @@ class Footer extends Component
         $this->socialLinks = $social->filledNetworks();
         $this->companyLinks = $navigation->footerCompany();
         $this->legalLinks = $navigation->footerLegal();
+        $this->serviceLinks = $navigation->footerServices();
+        $this->areaLinks = $navigation->footerAreas();
     }
 
     public function render(): View

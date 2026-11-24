@@ -1,6 +1,6 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header title="Contact Us" :breadcrumbs="[['label' => 'Contact']]">
-        Call, WhatsApp or send us a message. Ask for a quote or a callback and a member of the team will get back to you, usually within a few working hours.
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+        {{ $page->intro }}
     </x-site.page-header>
 
     <x-ui.section tone="ice" spacing="tight">

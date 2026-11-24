@@ -27,11 +27,11 @@
                 </x-ui.badge>
 
                 <h1 class="mt-5 text-4xl leading-[1.08] font-extrabold text-white sm:text-5xl lg:text-6xl">
-                    Expert iPhone Repair in Blackburn <span class="text-sky-400">We Collect, Repair &amp; Return</span>
+                    {{ $page->title }} @if ($page->eyebrow)<span class="text-sky-400">{{ $page->eyebrow }}</span>@endif
                 </h1>
 
                 <p class="mt-6 max-w-lg text-lg leading-relaxed text-sky-200">
-                    No trips, no queues. Book online, we pick up your iPhone from home or work, repair it with quality parts and bring it straight back, with a warranty on every repair.
+                    {{ $page->intro }}
                 </p>
 
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -109,28 +109,16 @@
     </x-ui.section>
 
     {{-- Popular repairs --}}
-    @if ($popularRepairs !== [])
+    @if ($popularServices !== [])
         <x-ui.section tone="white" class="pt-0 sm:pt-0 lg:pt-0">
             <x-ui.section-heading eyebrow="Popular repairs" title="The repairs we do most">
                 Clear prices for every model. Choose your repair to get started.
             </x-ui.section-heading>
 
             <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ($popularRepairs as ['repair' => $repair, 'from_pence' => $fromPence])
+                @foreach ($popularServices as $item)
                     <li>
-                        <x-ui.card class="flex h-full flex-col" :interactive="true">
-                            @if ($repair->icon)
-                                <img src="{{ asset("images/icons/icon-{$repair->icon}-navy-96.webp") }}" alt="" width="56" height="56" loading="lazy" class="size-14 rounded-2xl bg-ice-50 p-2">
-                            @endif
-                            <h3 class="mt-5 text-xl font-bold">{{ $repair->name }}</h3>
-                            @if ($repair->summary)
-                                <p class="mt-2 flex-1 leading-relaxed">{{ $repair->summary }}</p>
-                            @endif
-                            <p class="mt-5 flex items-baseline gap-1.5">
-                                <span class="text-sm">from</span>
-                                <span class="font-heading text-2xl font-extrabold text-navy-900">{{ \App\Support\Money::format($fromPence) }}</span>
-                            </p>
-                        </x-ui.card>
+                        <x-site.service-card :name="$item['name']" :url="$item['url']" :summary="$item['summary']" :icon="$item['icon']" :from-pence="$item['from_pence']" />
                     </li>
                 @endforeach
             </ul>
@@ -174,5 +162,122 @@
         </div>
     </x-ui.section>
 
+    {{-- Video shorts --}}
+    @if ($videos->isNotEmpty())
+        <x-ui.section tone="white">
+            <x-ui.section-heading eyebrow="Videos" title="See how it works">
+                Short videos from our workshop: how collection works, what happens during a repair and how to look after your iPhone.
+            </x-ui.section-heading>
+
+            <ul class="-mx-4 mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0 lg:grid lg:grid-cols-6 lg:overflow-visible" aria-label="Videos">
+                @foreach ($videos as $video)
+                    <li class="w-56 shrink-0 snap-start lg:w-auto">
+                        <x-site.video-card :video="$video" />
+                    </li>
+                @endforeach
+            </ul>
+
+            @if (Route::has('videos.index'))
+                <div class="mt-8 text-center">
+                    <x-ui.button :href="route('videos.index')" variant="secondary">All videos</x-ui.button>
+                </div>
+            @endif
+        </x-ui.section>
+    @endif
+
+    {{-- Areas we cover --}}
+    @if ($areas->isNotEmpty())
+        <x-ui.section tone="ice">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <x-ui.section-heading align="left" eyebrow="Areas we cover" title="We collect across East Lancashire">
+                        From Blackburn and Darwen to Accrington, Great Harwood and Clitheroe. Find your town or check your postcode.
+                    </x-ui.section-heading>
+                    <ul class="mt-8 flex flex-wrap gap-2.5">
+                        @foreach ($areas as $area)
+                            <li>
+                                <a href="{{ $area->url() }}" class="inline-flex items-center gap-2 rounded-full border border-ice-100 bg-white px-4 py-2 font-semibold text-navy-900 shadow-sm hover:border-sky-200">
+                                    <x-heroicon-s-map-pin class="size-4 text-royal-600" aria-hidden="true" />
+                                    {{ $area->town }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <x-ui.button :href="route('areas.index')" variant="secondary" class="mt-8">Check your postcode</x-ui.button>
+                </div>
+                <x-site.area-map :areas="$areas" />
+            </div>
+        </x-ui.section>
+    @endif
+
+    {{-- Reviews (genuine only) --}}
+    <x-ui.section tone="white">
+        <x-ui.section-heading eyebrow="Reviews" title="What our customers say">
+            Every review we show was left by a real customer.
+        </x-ui.section-heading>
+
+        @if ($reviews->isNotEmpty())
+            <ul class="mt-12 grid gap-6 md:grid-cols-3">
+                @foreach ($reviews as $review)
+                    <li><x-site.review-card :review="$review" /></li>
+                @endforeach
+            </ul>
+            <div class="mt-10 text-center">
+                <x-ui.button :href="route('reviews')" variant="secondary">Read all reviews</x-ui.button>
+            </div>
+        @else
+            <div class="mx-auto mt-10 max-w-xl rounded-card border border-ice-100 bg-ice-50 p-8 text-center">
+                <p class="leading-relaxed">We are a new local business and our first reviews are on their way. Repaired with us? We would love to hear how it went.</p>
+                <x-ui.button :href="route('reviews')" variant="secondary" class="mt-5">Leave a review</x-ui.button>
+            </div>
+        @endif
+    </x-ui.section>
+
+    {{-- Latest guides --}}
+    @if ($posts->isNotEmpty())
+        <x-ui.section tone="ice">
+            <x-ui.section-heading eyebrow="From the blog" title="Latest iPhone guides">
+                Practical advice from our repair team.
+            </x-ui.section-heading>
+            <ul class="mt-12 grid gap-6 md:grid-cols-3">
+                @foreach ($posts as $post)
+                    <li><x-site.post-card :post="$post" /></li>
+                @endforeach
+            </ul>
+            <div class="mt-10 text-center">
+                <x-ui.button :href="route('blog.index')" variant="secondary">All guides</x-ui.button>
+            </div>
+        </x-ui.section>
+    @endif
+
+    {{-- FAQs --}}
+    @if ($faqs->isNotEmpty())
+        <x-ui.section tone="white" width="narrow">
+            <x-ui.section-heading eyebrow="FAQs" title="Questions we are often asked" />
+            <x-site.faq-list :faqs="$faqs" class="mt-10" />
+            <div class="mt-8 text-center">
+                <a href="{{ route('faqs') }}" class="font-semibold text-royal-600 hover:underline">See all FAQs</a>
+            </div>
+        </x-ui.section>
+    @endif
+
     <x-site.contact-actions />
+
+    {{-- Coming soon (future services, switched on in Website & SEO settings) --}}
+    @if ($comingSoon->isNotEmpty())
+        <x-ui.section tone="white" spacing="tight">
+            <div class="flex flex-col items-center gap-5 rounded-card border border-dashed border-sky-200 bg-ice-50 p-8 text-center lg:flex-row lg:justify-between lg:text-left">
+                <div>
+                    <p class="text-sm font-semibold tracking-wider text-royal-600 uppercase">Coming soon</p>
+                    <h2 class="mt-1 text-2xl font-extrabold">More from ZR Technologies</h2>
+                    <p class="mt-1.5">We are getting ready to offer {{ $comingSoon->pluck('name')->map(fn ($name) => \Illuminate\Support\Str::lower($name))->join(', ', ' and ') }}.</p>
+                </div>
+                <ul class="flex flex-wrap justify-center gap-2">
+                    @foreach ($comingSoon as $category)
+                        <li><x-ui.badge>{{ $category->name }}</x-ui.badge></li>
+                    @endforeach
+                </ul>
+            </div>
+        </x-ui.section>
+    @endif
 </x-layouts.app>

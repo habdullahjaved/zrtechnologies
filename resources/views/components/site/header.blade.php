@@ -23,9 +23,83 @@
             >
         </a>
 
-        @if ($links !== [])
+        @if ($links !== [] || $megaMenu !== null)
             <nav aria-label="Main" class="hidden flex-1 lg:block">
                 <ul class="flex items-center justify-center gap-1">
+                    @if ($megaMenu !== null)
+                        <li x-data="megaMenu" @mouseenter="enter()" @mouseleave="leave()" @keydown.escape="close(true)" @focusout="focusOut($event)" @click.outside="close()">
+                            <button
+                                type="button"
+                                x-ref="button"
+                                @click="toggle()"
+                                :aria-expanded="open.toString()"
+                                aria-controls="mega-menu"
+                                @class([
+                                    'flex items-center gap-1 rounded-lg px-3 py-2 text-[0.95rem] font-semibold hover:bg-ice-50 hover:text-royal-600',
+                                    'text-royal-600' => $megaMenu['active'],
+                                    'text-navy-900' => ! $megaMenu['active'],
+                                ])
+                            >
+                                iPhone Repair
+                                <x-heroicon-m-chevron-down class="size-4 transition" ::class="open && 'rotate-180'" aria-hidden="true" />
+                            </button>
+
+                            <div
+                                id="mega-menu"
+                                x-show="open"
+                                x-cloak
+                                x-transition:enter="transition duration-150 ease-out"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute inset-x-0 top-full border-b border-ice-100 bg-white shadow-lift"
+                            >
+                                <div class="mx-auto grid max-w-7xl gap-10 px-8 py-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                                    <div>
+                                        <p class="text-xs font-semibold tracking-wider text-ink uppercase">Repairs</p>
+                                        @if ($megaMenu['services'] !== [])
+                                            <ul class="mt-4 grid grid-cols-2 gap-1 xl:grid-cols-3">
+                                                @foreach ($megaMenu['services'] as $service)
+                                                    <li>
+                                                        <a href="{{ $service['url'] }}" class="flex items-center gap-3 rounded-xl p-2.5 hover:bg-ice-50">
+                                                            @if ($service['icon'])
+                                                                <img src="{{ asset("images/icons/icon-{$service['icon']}-navy-96.webp") }}" alt="" width="40" height="40" loading="lazy" class="size-10 shrink-0 rounded-lg bg-ice-50 p-1.5">
+                                                            @endif
+                                                            <span>
+                                                                <span class="block font-semibold text-navy-900">{{ $service['label'] }}</span>
+                                                                @if ($service['from'])
+                                                                    <span class="block text-sm">from {{ $service['from'] }}</span>
+                                                                @endif
+                                                            </span>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                        <a href="{{ $megaMenu['url'] }}" class="mt-5 inline-flex items-center gap-1.5 font-semibold text-royal-600 hover:underline">
+                                            All iPhone repairs
+                                            <x-heroicon-m-arrow-right class="size-4" aria-hidden="true" />
+                                        </a>
+                                    </div>
+
+                                    <div class="rounded-card bg-ice-50 p-6">
+                                        @if ($megaMenu['models'] !== [])
+                                            <p class="text-xs font-semibold tracking-wider text-ink uppercase">Popular models</p>
+                                            <ul class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+                                                @foreach ($megaMenu['models'] as $model)
+                                                    <li><a href="{{ $model['url'] }}" class="font-medium text-navy-900 hover:text-royal-600">{{ $model['label'] }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                        @if ($megaMenu['prices_url'])
+                                            <x-ui.button :href="$megaMenu['prices_url']" variant="secondary" size="md" class="mt-6 w-full">
+                                                See all repair prices
+                                            </x-ui.button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    @endif
                     @foreach ($links as $link)
                         <li>
                             <a
@@ -93,9 +167,32 @@
             x-transition:leave-end="opacity-0"
             class="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto bg-white px-4 pt-4 pb-28 lg:hidden"
         >
-            @if ($links !== [])
+            @if ($links !== [] || $megaMenu !== null)
                 <nav aria-label="Mobile">
                     <ul class="divide-y divide-ice-100">
+                        @if ($megaMenu !== null)
+                            <li x-data="{ expanded: false }">
+                                <button type="button" @click="expanded = ! expanded" :aria-expanded="expanded.toString()" aria-controls="mobile-repairs" class="flex w-full items-center justify-between py-4 font-heading text-lg font-bold text-navy-900">
+                                    iPhone Repair
+                                    <x-heroicon-o-chevron-down class="size-5 text-royal-600 transition" ::class="expanded && 'rotate-180'" aria-hidden="true" />
+                                </button>
+                                <ul id="mobile-repairs" x-show="expanded" x-cloak class="grid gap-1 pb-4">
+                                    @foreach ($megaMenu['services'] as $service)
+                                        <li>
+                                            <a href="{{ $service['url'] }}" @click="close()" class="flex items-center justify-between rounded-lg px-3 py-2.5 font-semibold text-navy-900 hover:bg-ice-50">
+                                                {{ $service['label'] }}
+                                                @if ($service['from'])
+                                                    <span class="text-sm font-normal text-ink">from {{ $service['from'] }}</span>
+                                                @endif
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                    <li>
+                                        <a href="{{ $megaMenu['url'] }}" @click="close()" class="block rounded-lg px-3 py-2.5 font-semibold text-royal-600 hover:bg-ice-50">All iPhone repairs</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
                         @foreach ($links as $link)
                             <li>
                                 <a href="{{ $link['url'] }}" @click="close()" class="flex items-center justify-between py-4 font-heading text-lg font-bold text-navy-900">

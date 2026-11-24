@@ -82,6 +82,35 @@
             </div>
         </div>
 
+        @if ($serviceLinks !== [] || $areaLinks !== [])
+            <div class="mt-12 grid gap-10 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-12">
+                @if ($serviceLinks !== [])
+                    <div class="lg:col-span-7">
+                        <h3 class="font-heading text-sm font-bold tracking-wider text-white uppercase">iPhone repairs</h3>
+                        <ul class="mt-5 grid gap-x-6 gap-y-3 text-[0.95rem] sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($serviceLinks as $link)
+                                <li><a href="{{ $link['url'] }}" class="hover:text-white">{{ $link['label'] }}</a></li>
+                            @endforeach
+                            @if (Route::has('prices'))
+                                <li><a href="{{ route('prices') }}" class="font-semibold text-white hover:text-sky-400">All repair prices</a></li>
+                            @endif
+                        </ul>
+                    </div>
+                @endif
+
+                @if ($areaLinks !== [])
+                    <div class="lg:col-span-5">
+                        <h3 class="font-heading text-sm font-bold tracking-wider text-white uppercase">Areas we cover</h3>
+                        <ul class="mt-5 grid gap-x-6 gap-y-3 text-[0.95rem] sm:grid-cols-2">
+                            @foreach ($areaLinks as $link)
+                                <li><a href="{{ $link['url'] }}" class="hover:text-white">{{ $link['label'] }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         {{-- Company details + disclaimer --}}
         <div class="mt-14 border-t border-white/10 pt-8 text-sm leading-relaxed text-slate-400">
             @if ($legalLinks !== [])

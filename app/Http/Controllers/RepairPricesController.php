@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SystemPage;
+use App\Models\Page;
+use App\Services\Content\ServiceDirectory;
 use App\Services\Pricing\PricingService;
-use App\Support\Seo\SeoData;
+use App\Services\Seo\SchemaGraph;
+use App\Services\Seo\SeoResolver;
 use Illuminate\Contracts\View\View;
 
 /**
@@ -11,20 +15,22 @@ use Illuminate\Contracts\View\View;
  */
 class RepairPricesController extends Controller
 {
-    public function __invoke(PricingService $pricing): View
+    public function __invoke(PricingService $pricing, SeoResolver $seo, SchemaGraph $schema, ServiceDirectory $directory): View
     {
-        $priceList = $pricing->priceList();
+        $page = Page::system(SystemPage::Prices);
+        $breadcrumbs = [['label' => 'Repair prices']];
+        $fromPrices = $pricing->fromPrices();
 
         return view('pages.repair-prices', [
-            'seo' => new SeoData(
-                title: 'iPhone Repair Prices in Blackburn',
-                description: 'Clear, fixed iPhone repair prices for every model, from screens and batteries to charging ports and cameras. Collection and return across Blackburn.',
-                image: 'images/og/og-repair-prices.jpg',
-                imageAlt: 'ZR Technologies iPhone repair prices',
-            ),
+            'seo' => $seo->forPage($page, $breadcrumbs)->withSchema([
+                $schema->serviceNode('iPhone Repair', (string) $page->intro, route('prices'), $fromPrices),
+            ]),
+            'page' => $page,
+            'breadcrumbs' => $breadcrumbs,
             'repairs' => $pricing->repairsWithFromPrices(),
             'models' => $pricing->modelsWithPrices(),
-            'priceList' => $priceList,
+            'priceList' => $pricing->priceList(),
+            'directory' => $directory,
         ]);
     }
 }

@@ -9,7 +9,7 @@
         <label for="{{ $inputId }}" @class(['mb-2 block text-sm font-semibold', 'text-white' => $onDark, 'text-navy-900' => ! $onDark])>
             Check we collect from you
         </label>
-        <div class="flex flex-col gap-2.5 sm:flex-row">
+        <div @class(['flex flex-col gap-2.5', 'sm:flex-row' => $variant !== 'compact'])>
             <input
                 id="{{ $inputId }}"
                 type="text"
@@ -21,7 +21,8 @@
                 placeholder="Your postcode, e.g. BB2 4NY"
                 @if ($hasError) aria-invalid="true" aria-describedby="{{ $inputId }}-error" @endif
                 @class([
-                    'block w-full rounded-xl border bg-white px-4 py-3 text-base text-navy-950 uppercase shadow-sm placeholder:normal-case placeholder:text-slate-500 focus:border-royal-600 focus:ring-2 focus:ring-sky-400/40 sm:max-w-xs',
+                    'block w-full rounded-xl border bg-white px-4 py-3 text-base text-navy-950 uppercase shadow-sm placeholder:normal-case placeholder:text-slate-500 focus:border-royal-600 focus:ring-2 focus:ring-sky-400/40',
+                    'sm:max-w-xs' => $variant !== 'compact',
                     'border-slate-300' => ! $hasError,
                     'border-danger-600' => $hasError,
                 ])

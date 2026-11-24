@@ -42,7 +42,7 @@ class PostcodeChecker extends Component
 
     public function mount(string $variant = 'panel', string $idPrefix = 'postcode-checker'): void
     {
-        $this->variant = in_array($variant, ['hero', 'panel'], true) ? $variant : 'panel';
+        $this->variant = in_array($variant, ['hero', 'panel', 'compact'], true) ? $variant : 'panel';
         $this->idPrefix = $idPrefix;
     }
 

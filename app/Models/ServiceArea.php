@@ -2,6 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasFaqs;
+use App\Models\Concerns\HasSeoMeta;
+use App\Models\Concerns\RedirectsOnSlugChange;
+use App\Models\Contracts\HasPublicPage;
+use App\Services\Seo\ContentQuality;
+use App\Settings\SiteSettings;
 use App\Support\Money;
 use Database\Factories\ServiceAreaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -9,6 +15,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -19,12 +26,14 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $centre_lat
  * @property string|null $centre_lng
  * @property string|null $radius_km
+ * @property string $similarity_score
+ * @property list<array{type: string, data: array<string, mixed>}>|null $blocks
  */
-#[Fillable(['name', 'slug', 'town', 'county', 'postcode_districts', 'centre_lat', 'centre_lng', 'radius_km', 'collection_fee_pence', 'typical_collection_times', 'summary', 'is_active', 'is_draft', 'sort'])]
-class ServiceArea extends Model
+#[Fillable(['name', 'slug', 'town', 'county', 'postcode_districts', 'centre_lat', 'centre_lng', 'radius_km', 'collection_fee_pence', 'typical_collection_times', 'summary', 'intro', 'blocks', 'landmarks', 'is_active', 'is_draft', 'sort'])]
+class ServiceArea extends Model implements HasPublicPage
 {
     /** @use HasFactory<ServiceAreaFactory> */
-    use HasFactory, LogsActivity;
+    use HasFactory, HasFaqs, HasSeoMeta, LogsActivity, RedirectsOnSlugChange;
 
     /**
      * @return array<string, string>
@@ -39,6 +48,9 @@ class ServiceArea extends Model
             'collection_fee_pence' => 'integer',
             'is_active' => 'boolean',
             'is_draft' => 'boolean',
+            'blocks' => 'array',
+            'unique_word_count' => 'integer',
+            'similarity_score' => 'decimal:2',
         ];
     }
 
@@ -51,6 +63,50 @@ class ServiceArea extends Model
     protected function listed(Builder $query): void
     {
         $query->where('is_active', true)->orderBy('sort')->orderBy('name');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $area): void {
+            if ($area->wasChanged(['intro', 'blocks', 'landmarks', 'summary']) || $area->wasRecentlyCreated) {
+                app(ContentQuality::class)->refreshServiceAreas();
+            }
+        });
+    }
+
+    /**
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function url(): string
+    {
+        return route('locations.show', $this->slug);
+    }
+
+    public function pathForSlug(string $slug): ?string
+    {
+        return '/iphone-repair-'.$slug;
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->is_active;
+    }
+
+    /**
+     * Enough unique local content, not too similar to another town's page.
+     */
+    public function passesContentChecks(): bool
+    {
+        return app(ContentQuality::class)->passes(
+            $this->unique_word_count,
+            (float) $this->similarity_score,
+            app(SiteSettings::class)->min_unique_words_location,
+        );
     }
 
     public function coversDistrict(string $outcode): bool

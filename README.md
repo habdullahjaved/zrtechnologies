@@ -16,8 +16,8 @@ The full brief is in [`ZR_TECHNOLOGIES_BUILD_PROMPT.md`](ZR_TECHNOLOGIES_BUILD_P
 | 1 | Foundation: admin panel, roles, MFA, settings, design system, layout | Done |
 | 2 | Catalogue, pricing, coverage, price and postcode checkers | Done |
 | 3 | Booking wizard, leads, customers, repair jobs, emails, repair tracking | Done |
-| 4 | Content & SEO | Next |
-| 5 | Tracking & go-live | Planned |
+| 4 | Content & SEO: pages, repair, model and location pages, blog, videos, FAQs, reviews, schema, sitemaps, redirects | Done |
+| 5 | Tracking & go-live | Next |
 
 ## Requirements
 
@@ -67,7 +67,9 @@ php artisan serve
 | Draft service areas, weekly collection timetable, bank holidays | `CoverageSeeder` | all (only creates what is missing) |
 | Wording of every customer email, team alert and WhatsApp reply | `MessageTemplateSeeder` | all (only creates what is missing) |
 | One demo account per role (password `password`) | `DemoStaffSeeder` | local/testing only |
+| Website content: every page with its wording, legal drafts, ten repair pages, 28 FAQs, blog categories and six draft posts, video placeholders, menus, local content for the location pages | `ContentSeeder` | all (only creates what is missing) |
 | Sample leads, customers and repair jobs (names start with "Demo", emails @example.com) | `DemoCrmSeeder` | local/testing only |
+| Sample reviews, labelled and never shown in production | `DemoContentSeeder` | local/testing only |
 
 Demo accounts: `manager@`, `technician@`, `content@`, `sales@zrtechnologies.test`.
 
@@ -86,15 +88,29 @@ Every seeded price and service area is marked **DRAFT – confirm before launch*
 - **Emails** (booking confirmation, enquiry received, repair updates, team alerts) are queued and use the wording in **Admin → Settings → Message templates**. Team alerts can also go to Slack or Telegram (**Settings → Team alerts**).
 - **Spam protection:** a hidden honeypot field, a minimum fill time and per-visitor rate limits on every public form, with no CAPTCHA. Cloudflare Turnstile can be added in Phase 5 if spam gets through.
 
+## Content and SEO
+
+- **Pages:** every page has its heading, introduction, content blocks, FAQs and SEO in **Admin → Content → Pages**. Site pages keep a fixed address and cannot be deleted; custom pages are served at `/{slug}`. Legal pages are drafts flagged **Needs legal review** until checked.
+- **Repair pages** (`/iphone-repair/{slug}`) cover one or more repair types and show live prices for every model. **Model pages** (`/iphone-repair/iphone-15-pro`) are built from the price list. Optional **model × repair pages** are switched on per model.
+- **Location pages** (`/iphone-repair-{town}`) and model × repair pages stay `noindex` (canonical to the parent page) and out of the sitemap until their own content passes the unique-content check: enough words, and no more than 50% similar to a sibling (thresholds in **Settings → Website & SEO**).
+- **SEO fields** on every page, post, repair page, model, area and video: title (with a pixel-width guide), description, focus keyword, Google preview, checklist, noindex/nofollow, canonical, share image and extra JSON-LD. Empty fields fall back to the **title patterns** in Website & SEO settings.
+- **Structured data:** LocalBusiness (service-area: the street address is hidden unless switched on in Business settings), WebSite, WebPage, BreadcrumbList, Service with live prices, FAQPage (only where FAQs are visible), BlogPosting, Person and VideoObject.
+- **Sitemaps:** `/sitemap.xml` indexes `/sitemaps/{pages,services,models,locations,blog,videos}.xml`, with image and video entries, and only lists indexable pages. `robots.txt` adds the sitemap and any extra rules from settings.
+- **Redirects:** changing a slug redirects the old address automatically (no chains). The **404 log** (Admin → SEO) shows missing addresses with a one-click "Create redirect".
+- **Blog:** draft → ready for review → scheduled/published, table of contents, reading time, last-updated date, share links, author pages, related posts, internal-link suggestions in the editor and an RSS feed at `/blog/feed`. Tag pages are `noindex` unless switched on.
+- **Videos:** placeholders show a branded "coming soon" card; YouTube videos load only when played (privacy-enhanced mode).
+- **Reviews:** genuine reviews only (copy them from Google). Sample reviews exist only locally and never show in production. Set the Google review link in **Settings → Social** to power `/reviews/leave`.
+- **Page cache:** public pages are cached for anonymous visitors and cleared automatically when content, prices or settings change, and after each `npm run build`. Disable with `PAGE_CACHE_ENABLED=false`.
+
 ## Staff roles
 
 | Role | Access |
 |---|---|
 | Super Admin | Everything, including roles |
 | Manager | Staff (except super admins), all settings, audit log, catalogue, prices, coverage, leads, customers and every repair job |
-| Marketing / Content | Website & SEO and social settings; message templates; edits model and repair descriptions; views prices (blog, pages and SEO tools arrive in Phase 4) |
+| Marketing / Content | Pages, repair pages, blog, authors, videos, FAQs, reviews, menus, redirects and the 404 log; Website & SEO and social settings; message templates; model and repair descriptions; views prices |
 | Technician | Only the repair jobs assigned to them, without prices: updates status, diagnosis, IMEI and notes. Views the price list |
-| Sales / Support | Leads, customers and all repair jobs (including prices); views prices, service areas and collection times. Cannot delete records |
+| Sales / Support | Leads, customers and all repair jobs (including prices); adds customer reviews; views prices, service areas and collection times. Cannot delete records |
 
 Permissions are defined in `database/seeders/RolesAndPermissionsSeeder.php` and can be fine-tuned in **Admin → Users & security → Roles & permissions**.
 
@@ -114,7 +130,7 @@ Shared hosting has no long-running queue worker, so a single cron entry runs the
 * * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Emails therefore go out within about a minute. After each deploy, run `php artisan migrate --force` and then `php artisan settings:clear-cache` (settings are cached, so new settings fields need a fresh cache).
+Emails therefore go out within about a minute, and scheduled pages and posts are published within five minutes of their date. After each deploy, run `php artisan migrate --force` and then `php artisan settings:clear-cache` (settings are cached, so new settings fields need a fresh cache).
 
 See `routes/console.php`. Full Hostinger deployment steps (document root, SSH, `composer2`, cron, SMTP, DNS) are added in Phase 5.
 

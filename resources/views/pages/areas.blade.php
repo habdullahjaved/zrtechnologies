@@ -1,6 +1,6 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header title="Areas We Cover" :breadcrumbs="[['label' => 'Areas we cover']]">
-        We collect your iPhone from your home or workplace across {{ $townList }}, repair it and bring it back.
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+        {{ $page->intro }}
     </x-site.page-header>
 
     <x-ui.section tone="ice" spacing="tight">
@@ -24,7 +24,7 @@
                     <li>
                         <x-ui.card class="h-full">
                             <div class="flex items-start justify-between gap-3">
-                                <h3 class="text-xl font-bold">{{ $area->name }}</h3>
+                                <h3 class="text-xl font-bold"><a href="{{ $area->url() }}" class="hover:text-royal-600">{{ $area->name }}</a></h3>
                                 <x-heroicon-o-map-pin class="size-6 shrink-0 text-royal-600" aria-hidden="true" />
                             </div>
                             @if ($area->summary)
@@ -50,10 +50,15 @@
                                     </div>
                                 @endif
                             </dl>
+                            <a href="{{ $area->url() }}" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-royal-600 hover:underline">iPhone repair in {{ $area->town }} <x-heroicon-m-arrow-right class="size-4" aria-hidden="true" /></a>
                         </x-ui.card>
                     </li>
                 @endforeach
             </ul>
+        @endif
+
+        @if ($areas->isNotEmpty())
+            <x-site.area-map :areas="$areas" class="mt-12" />
         @endif
     </x-ui.section>
 

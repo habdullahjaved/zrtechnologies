@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SystemPage;
+use App\Models\Page;
 use App\Models\RepairJob;
+use App\Services\Seo\SeoResolver;
 use App\Settings\BookingSettings;
 use App\Settings\BusinessSettings;
 use App\Support\Messaging\MessageVariables;
@@ -21,15 +24,15 @@ use Illuminate\Support\Facades\URL;
  */
 class BookingController extends Controller
 {
-    public function create(): View
+    public function create(SeoResolver $seo): View
     {
+        $page = Page::system(SystemPage::Booking);
+        $breadcrumbs = [['label' => 'Book a repair']];
+
         return view('pages.booking.create', [
-            'seo' => new SeoData(
-                title: 'Book an iPhone Repair with Collection',
-                description: 'Book your iPhone repair online in a few minutes. We collect from your home or workplace, repair it and bring it back.',
-                image: 'images/og/og-book-repair.jpg',
-                imageAlt: 'Book an iPhone repair with ZR Technologies',
-            ),
+            'seo' => $seo->forPage($page, $breadcrumbs),
+            'page' => $page,
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 

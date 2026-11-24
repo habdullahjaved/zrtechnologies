@@ -13,9 +13,17 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ $imageAlt }}">
+@if ($seo->publishedTime)
+    <meta property="article:published_time" content="{{ $seo->publishedTime }}">
+@endif
+@if ($seo->type === 'article' && $seo->modifiedTime)
+    <meta property="article:modified_time" content="{{ $seo->modifiedTime }}">
+@endif
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $title }}">
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $image }}">
 <meta name="twitter:image:alt" content="{{ $imageAlt }}">
+
+<script type="application/ld+json">{!! $jsonLd !!}</script>

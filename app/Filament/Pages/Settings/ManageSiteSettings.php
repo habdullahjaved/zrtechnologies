@@ -78,6 +78,85 @@ class ManageSiteSettings extends BaseSettingsPage
                         ->maxLength(255)
                         ->columnSpanFull(),
                 ]),
+            Section::make('Title patterns')
+                ->description('Automatic page titles, used when a page has no SEO title of its own. Placeholders: {name}, {model}, {repair}, {town}, {title} and {price} (the "from" price). Anything after a | that has an empty placeholder is left out. The site name is added at the end.')
+                ->columns(2)
+                ->columnSpanFull()
+                ->collapsible()
+                ->schema([
+                    TextInput::make('title_pattern_service')
+                        ->label('Repair pages')
+                        ->helperText('e.g. "iPhone Screen Replacement in Blackburn | From £49"')
+                        ->required()
+                        ->maxLength(120),
+                    TextInput::make('title_pattern_model')
+                        ->label('Model pages')
+                        ->required()
+                        ->maxLength(120),
+                    TextInput::make('title_pattern_model_repair')
+                        ->label('Model × repair pages')
+                        ->required()
+                        ->maxLength(120),
+                    TextInput::make('title_pattern_location')
+                        ->label('Location pages')
+                        ->required()
+                        ->maxLength(120),
+                    TextInput::make('title_pattern_post')
+                        ->label('Blog posts')
+                        ->required()
+                        ->maxLength(120),
+                    TextInput::make('title_pattern_post_category')
+                        ->label('Blog categories')
+                        ->required()
+                        ->maxLength(120),
+                ]),
+            Section::make('Thin-content protection')
+                ->description('Location and model × repair pages are hidden from search engines (and left out of the sitemap) until their own content passes these checks, so they can never look like doorway pages.')
+                ->columns(3)
+                ->columnSpanFull()
+                ->collapsible()
+                ->schema([
+                    TextInput::make('min_unique_words_location')
+                        ->label('Words needed: location pages')
+                        ->integer()
+                        ->minValue(100)
+                        ->maxValue(3000)
+                        ->required(),
+                    TextInput::make('min_unique_words_model_repair')
+                        ->label('Words needed: model × repair pages')
+                        ->integer()
+                        ->minValue(100)
+                        ->maxValue(3000)
+                        ->required(),
+                    TextInput::make('max_similarity_percent')
+                        ->label('Maximum similarity to another page')
+                        ->suffix('%')
+                        ->integer()
+                        ->minValue(10)
+                        ->maxValue(90)
+                        ->required(),
+                ]),
+            Section::make('Crawling')
+                ->columnSpanFull()
+                ->collapsible()
+                ->schema([
+                    Toggle::make('index_tag_pages')
+                        ->label('Let search engines index blog tag pages')
+                        ->helperText('Off by default: tag pages repeat the posts already on category pages.'),
+                    Textarea::make('robots_extra')
+                        ->label('Extra robots.txt lines')
+                        ->helperText('Added to robots.txt when indexing is on, one rule per line, e.g. "Disallow: /*?sort=". The admin, private customer pages and the sitemap line are added automatically.')
+                        ->rows(4)
+                        ->maxLength(2000),
+                ]),
+            Section::make('Home page')
+                ->columnSpanFull()
+                ->collapsible()
+                ->schema([
+                    Toggle::make('show_coming_soon')
+                        ->label('Show the "coming soon" teaser')
+                        ->helperText('Lists services that are switched off in Catalogue → Service categories (accessories, custom printing...).'),
+                ]),
             Section::make('Notices')
                 ->columnSpanFull()
                 ->schema([

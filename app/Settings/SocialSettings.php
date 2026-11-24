@@ -26,6 +26,9 @@ class SocialSettings extends Settings
 
     public ?string $ebay_store;
 
+    /** Google "write a review" link (https://g.page/r/.../review), used for review requests. */
+    public ?string $google_review_url;
+
     /** Footer-visible networks, in display order, with their labels. */
     public const array NETWORKS = [
         'facebook' => 'Facebook',

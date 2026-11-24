@@ -1,6 +1,6 @@
 <x-layouts.app :seo="$seo">
-    <x-site.page-header title="iPhone Repairs for Business" eyebrow="Businesses, schools and organisations" :breadcrumbs="[['label' => 'Business repairs']]">
-        Keep your team’s iPhones working. We collect from your site, repair the devices and bring them back, with one point of contact for every job.
+    <x-site.page-header :title="$page->title" :eyebrow="$page->eyebrow" :breadcrumbs="$breadcrumbs">
+        {{ $page->intro }}
     </x-site.page-header>
 
     <x-ui.section tone="white">
@@ -24,6 +24,8 @@
                         </li>
                     @endforeach
                 </ul>
+
+                <x-content.prose :content="$content" class="mt-10" />
             </div>
 
             <x-ui.card id="business-enquiry" class="scroll-mt-28">

@@ -4,14 +4,19 @@ namespace App\Filament\Resources\DeviceModels\Schemas;
 
 use App\Enums\DisplayType;
 use App\Filament\Resources\CatalogueFields;
+use App\Filament\Resources\ContentFields;
 use App\Models\DeviceBrand;
 use App\Models\DeviceModel;
+use App\Services\Seo\SeoResolver;
+use App\Settings\SiteSettings;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class DeviceModelForm
@@ -51,7 +56,7 @@ class DeviceModelForm
                         ->options(DisplayType::class),
                     Textarea::make('notes')
                         ->label('Model notes')
-                        ->helperText('Model-specific details for customers, e.g. which parts this model uses. Shown on the model page (coming with the content phase).')
+                        ->helperText('Model-specific details for customers, e.g. which parts this model uses. Shown in the "About" box on the model page.')
                         ->rows(3)
                         ->maxLength(2000)
                         ->columnSpanFull(),
@@ -75,6 +80,27 @@ class DeviceModelForm
                         ->default(fn (): int => max(0, (int) DeviceModel::query()->min('sort') - 10))
                         ->required(),
                 ]),
+            Section::make('Model page')
+                ->description('The page at /iphone-repair/{slug}. Its price list, model facts and booking buttons are added automatically.')
+                ->columnSpanFull()
+                ->schema([
+                    Textarea::make('intro')
+                        ->label('Introduction')
+                        ->helperText('Shown under the page heading. Leave empty for the standard wording.')
+                        ->rows(3)
+                        ->maxLength(1000),
+                    ContentFields::blocks(),
+                    ContentFields::faqs(),
+                ]),
+            ContentFields::seo(
+                defaultTitle: fn (Get $get): string => app(SeoResolver::class)->pattern(app(SiteSettings::class)->title_pattern_model, [
+                    'model' => $get('../name') ?: 'iPhone',
+                    'price' => '£…',
+                ]),
+                defaultDescription: fn (Get $get): ?string => filled($get('../name')) ? $get('../name').' repair in Blackburn: screen, battery, charging port, cameras and more.' : null,
+                url: fn (?Model $record): ?string => $record instanceof DeviceModel ? $record->url() : null,
+                contentText: fn (Get $get): string => implode(' ', [$get('../notes'), $get('../intro'), ContentFields::blocksText($get('../blocks'))]),
+            ),
         ]);
     }
 }

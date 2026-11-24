@@ -26,8 +26,11 @@ class Header extends Component
 
     public bool $bookingOpensWhatsApp;
 
-    /** @var list<array{label: string, url: string, active: bool}> */
+    /** @var list<array{label: string, url: string, active: bool, external: bool}> */
     public array $links;
+
+    /** @var array{url: string, active: bool, services: list<array{label: string, url: string, icon: string|null, from: string|null}>, models: list<array{label: string, url: string}>, prices_url: string|null}|null */
+    public ?array $megaMenu;
 
     public ?string $announcement;
 
@@ -46,6 +49,7 @@ class Header extends Component
         $this->bookingUrl = $booking->url();
         $this->bookingOpensWhatsApp = $booking->opensWhatsApp();
         $this->links = $navigation->primary();
+        $this->megaMenu = $navigation->megaMenu();
         $this->announcement = $site->announcement;
     }
 
