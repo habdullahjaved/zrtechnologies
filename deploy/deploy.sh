@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Update the live site after pushing new code (see docs/DEPLOYMENT.md).
-# Upload public/build (npm run build on your computer) before running this.
+# Commit and push the built files (npm run build) from your computer first.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

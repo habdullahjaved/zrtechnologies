@@ -19,13 +19,37 @@ it('seeds the business facts from the brief', function () {
         ->and($business->show_street_address)->toBeFalse();
 });
 
-it('starts with indexing switched off and no social profiles', function () {
+it('starts with indexing switched off and only the Google Business Profile linked', function () {
     expect(app(SiteSettings::class)->allow_indexing)->toBeFalse()
-        ->and(app(SocialSettings::class)->sameAs())->toBe([])
+        ->and(app(SocialSettings::class)->sameAs())->toBe(['https://share.google/rC3I3iXS9seMC8iDk'])
         ->and(app(SocialSettings::class)->filledNetworks())->toBe([]);
 });
 
+it('shows round-the-clock opening as Open 24 hours, every day', function () {
+    expect(app(OpeningHoursSettings::class)->summary())->toBe(['Every day' => 'Open 24 hours'])
+        ->and(app(OpeningHoursSettings::class)->isOpenAllWeek())->toBeTrue();
+
+    $this->get(route('home'))->assertSee('Open 24 hours')->assertSee('Call or WhatsApp 24/7');
+});
+
+/**
+ * Weekday hours for the grouping tests.
+ */
+function useWeekdayHours(): void
+{
+    $weekday = ['is_open' => true, 'opens' => '09:00', 'closes' => '19:00'];
+    $hours = app(OpeningHoursSettings::class);
+    $hours->days = [
+        'monday' => $weekday, 'tuesday' => $weekday, 'wednesday' => $weekday, 'thursday' => $weekday, 'friday' => $weekday,
+        'saturday' => ['is_open' => true, 'opens' => '10:00', 'closes' => '17:00'],
+        'sunday' => ['is_open' => false, 'opens' => null, 'closes' => null],
+    ];
+    $hours->save();
+}
+
 it('groups consecutive days with the same opening hours', function () {
+    useWeekdayHours();
+
     expect(app(OpeningHoursSettings::class)->summary())->toBe([
         'Monday – Friday' => '9:00am – 7:00pm',
         'Saturday' => '10:00am – 5:00pm',
@@ -34,7 +58,8 @@ it('groups consecutive days with the same opening hours', function () {
 });
 
 it('does not group days that are not consecutive', function () {
-    $hours = app(OpeningHoursSettings::class);
+    useWeekdayHours();
+    $hours = freshSettings(OpeningHoursSettings::class);
     $days = $hours->days;
     $days['wednesday'] = ['is_open' => false, 'opens' => null, 'closes' => null];
     $hours->days = $days;

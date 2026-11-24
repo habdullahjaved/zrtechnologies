@@ -3,6 +3,7 @@
 namespace App\View\Components\Site;
 
 use App\Settings\BusinessSettings;
+use App\Settings\OpeningHoursSettings;
 use App\Settings\SiteSettings;
 use App\Support\BookingCallToAction;
 use App\Support\Navigation\SiteNavigation;
@@ -36,12 +37,16 @@ class Header extends Component
 
     public string $tradingName;
 
+    public bool $openAllWeek;
+
     public function __construct(
         BusinessSettings $business,
         SiteSettings $site,
         SiteNavigation $navigation,
         BookingCallToAction $booking,
+        OpeningHoursSettings $hours,
     ) {
+        $this->openAllWeek = $hours->isOpenAllWeek();
         $this->tradingName = $business->trading_name;
         $this->phoneDisplay = Phone::display($business->phone);
         $this->phoneHref = Phone::telHref($business->phone);

@@ -85,7 +85,7 @@ final class SystemPageDefaults
         'contact' => [
             'title' => 'Contact Us',
             'eyebrow' => 'We are here to help',
-            'intro' => 'Call, WhatsApp or send us a message. Ask for a quote or a callback and a member of the team will get back to you, usually within a few working hours.',
+            'intro' => 'Call, WhatsApp or send us a message. Ask for a quote or a callback and a member of the team will get back to you, usually within a few hours. We are open 24/7.',
             'meta_title' => 'Contact Us',
             'meta_description' => 'Contact ZR Technologies about an iPhone repair in Blackburn. Call or WhatsApp 07360 127538, or send us a message.',
             'og_image' => 'images/og/og-contact.jpg',

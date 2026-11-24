@@ -49,9 +49,11 @@ class OpeningHoursSettings extends Settings
 
         foreach (self::DAYS as $day => $label) {
             $hours = $this->days[$day] ?? ['is_open' => false, 'opens' => null, 'closes' => null];
-            $text = $hours['is_open'] && $hours['opens'] && $hours['closes']
-                ? self::formatTime($hours['opens']).' – '.self::formatTime($hours['closes'])
-                : 'Closed';
+            $text = match (true) {
+                ! $hours['is_open'] || ! $hours['opens'] || ! $hours['closes'] => 'Closed',
+                self::isAllDay($hours['opens'], $hours['closes']) => 'Open 24 hours',
+                default => self::formatTime($hours['opens']).' – '.self::formatTime($hours['closes']),
+            };
 
             if ($previousKey !== null && $groups[$previousKey]['text'] === $text) {
                 $groups[$previousKey]['last'] = $label;
@@ -63,6 +65,11 @@ class OpeningHoursSettings extends Settings
             $groups[$day] = ['first' => $label, 'last' => $label, 'text' => $text];
         }
 
+        // One group covering the whole week reads better as "Every day".
+        if (count($groups) === 1) {
+            return ['Every day' => array_values($groups)[0]['text']];
+        }
+
         $summary = [];
 
         foreach ($groups as $group) {
@@ -71,6 +78,27 @@ class OpeningHoursSettings extends Settings
         }
 
         return $summary;
+    }
+
+    /**
+     * Open round the clock: 00:00 to 23:59 (the format Google uses for 24 hours).
+     */
+    public static function isAllDay(string $opens, string $closes): bool
+    {
+        return $opens === '00:00' && in_array($closes, ['23:59', '24:00', '00:00'], true);
+    }
+
+    public function isOpenAllWeek(): bool
+    {
+        foreach (array_keys(self::DAYS) as $day) {
+            $hours = $this->days[$day] ?? null;
+
+            if (! $hours || ! $hours['is_open'] || ! self::isAllDay((string) $hours['opens'], (string) $hours['closes'])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

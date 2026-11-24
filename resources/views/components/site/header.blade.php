@@ -125,7 +125,7 @@
                     <x-heroicon-s-phone class="size-4" aria-hidden="true" />
                 </span>
                 <span class="leading-tight">
-                    <span class="block text-xs font-medium text-ink">Call or WhatsApp</span>
+                    <span class="block text-xs font-medium text-ink">Call or WhatsApp{{ $openAllWeek ? ' 24/7' : '' }}</span>
                     {{ $phoneDisplay }}
                 </span>
             </a>

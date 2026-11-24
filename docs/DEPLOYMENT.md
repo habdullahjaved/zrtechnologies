@@ -10,42 +10,34 @@ This guide puts the site live at **https://zrtechnologiesltd.com** on a Hostinge
 4. **SSH:** Advanced → SSH Access → enable it and note the host, port and username.
 5. **SSL:** Security → SSL → make sure the free certificate is active for `zrtechnologiesltd.com` and `www.zrtechnologiesltd.com`.
 
-## 2. Upload the code
+## 2. Get the code from GitHub
 
-The application lives **outside** `public_html`, so `.env`, `storage` and the code can never be downloaded. Only the `public` folder is web-facing.
+The code lives in **https://github.com/habdullahjaved/zrtechnologies** (built CSS/JS included, because shared hosting has no Node.js). It goes **outside** `public_html`, so `.env`, `storage` and the code can never be downloaded; only the `public` folder is web-facing.
 
-**Easiest: upload the package with the File Manager.** On your computer, build the package (code plus the built front-end files):
-
-```bash
-npm run build
-git archive --format=tar -o deploy/release/zrtechnologies.tar HEAD && tar -rf deploy/release/zrtechnologies.tar public/build
-```
-
-(or use the ready-made `deploy/release/zrtechnologies-upload.zip`). In hPanel → File Manager, open `domains/zrtechnologiesltd.com`, create a folder **`app`**, upload the zip into it and choose **Extract**. Then, over SSH:
-
-```bash
-cd ~/domains/zrtechnologiesltd.com/app
-php -v                                       # must say 8.4 or 8.5; if not, change it in hPanel and reconnect
-composer2 install --no-dev --optimize-autoloader
-```
-
-**Or with git**, if the project is on GitHub:
+**a. Give the server read access to the repository (once).** Over SSH:
 
 ```bash
 ssh -p PORT USER@HOST
-cd ~/domains/zrtechnologiesltd.com
-git clone https://github.com/YOUR-ACCOUNT/zrtechnologies.git app   # or upload the project by SFTP into "app"
-cd app
-composer2 install --no-dev --optimize-autoloader                      # Hostinger's "composer" is v1; use composer2
+ssh-keygen -t ed25519 -C "hostinger-zrtechnologies" -f ~/.ssh/github_zr -N ""
+cat ~/.ssh/github_zr.pub
+printf 'Host github.com\n  IdentityFile ~/.ssh/github_zr\n  IdentitiesOnly yes\n' >> ~/.ssh/config
 ```
 
-Front-end assets are built on your computer (there is no Node.js on shared hosting):
+Copy the line `cat` printed. On GitHub: the repository → **Settings → Deploy keys → Add deploy key**, paste it, leave "Allow write access" **off**, save.
+
+**b. Clone and install:**
 
 ```bash
-npm ci && npm run build          # on your computer
+cd ~/domains/zrtechnologiesltd.com
+git clone git@github.com:habdullahjaved/zrtechnologies.git app
+cd app
+php -v                                              # must say 8.4 or 8.5; if not, change it in hPanel and reconnect
+composer2 install --no-dev --optimize-autoloader   # Hostinger's "composer" is v1; use composer2
 ```
 
-Then upload the `public/build` folder to `~/domains/zrtechnologiesltd.com/app/public/build` by SFTP.
+(hPanel also has **Advanced → Git**, which can clone the same repository into `domains/zrtechnologiesltd.com/app`; you still need SSH for the commands below.)
+
+No SSH or GitHub? Upload `deploy/release/zrtechnologies-upload.zip` with File Manager into a folder named `app`, extract it, and run the `composer2` line from hPanel's terminal.
 
 ## 3. Point the website at `public`
 
@@ -132,7 +124,8 @@ It must show no ✗. Then, in the admin:
 
 ```bash
 # on your computer
-npm run build                 # then upload public/build by SFTP
+npm run build
+git add -A && git commit -m "Describe the change" && git push
 
 # on the server
 cd ~/domains/zrtechnologiesltd.com/app

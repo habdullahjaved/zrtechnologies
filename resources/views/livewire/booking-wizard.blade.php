@@ -84,7 +84,7 @@
                                 <x-heroicon-s-check-circle class="size-7 shrink-0 text-success-600" aria-hidden="true" />
                                 <div>
                                     <p class="text-lg font-bold text-navy-900">Thanks, we will be in touch.</p>
-                                    <p class="mt-1">Your reference is <strong>{{ $outOfAreaReference }}</strong>. We usually reply within a few working hours.</p>
+                                    <p class="mt-1">Your reference is <strong>{{ $outOfAreaReference }}</strong>. We usually reply within a few hours, day or night.</p>
                                 </div>
                             </div>
                         @else

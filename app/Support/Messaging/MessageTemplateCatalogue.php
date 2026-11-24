@@ -103,7 +103,7 @@ final class MessageTemplateCatalogue
                 'body' => <<<'MD'
                     # Thanks, {customer_first_name}.
 
-                    We have received your {enquiry_type} and a member of the team will be in touch shortly, usually within a few working hours.
+                    We have received your {enquiry_type} and a member of the team will be in touch shortly, usually within a few hours. We are open 24/7.
 
                     Your reference is **{reference}**.
 

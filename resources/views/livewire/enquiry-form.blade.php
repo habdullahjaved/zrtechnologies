@@ -10,7 +10,7 @@
                         @default Thanks, we have your message.
                     @endswitch
                 </p>
-                <p class="mt-1">Your reference is <strong>{{ $reference }}</strong>. We usually reply within a few working hours.</p>
+                <p class="mt-1">Your reference is <strong>{{ $reference }}</strong>. We usually reply within a few hours, day or night.</p>
                 <button type="button" wire:click="sendAnother" class="mt-3 text-sm font-semibold text-royal-600 hover:underline">Send another message</button>
             </div>
         </div>
