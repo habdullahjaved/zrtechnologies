@@ -47,7 +47,7 @@
         <p class="mt-2 text-sm font-semibold text-navy-900 sm:hidden">Step {{ $step }} of {{ count($stepLabels) }}: {{ $stepLabels[$step] }}</p>
     </nav>
 
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <x-ui.card padding="p-5 sm:p-8">
             @error('form')
                 <x-ui.alert tone="warning" class="mb-6">{{ $message }}</x-ui.alert>
@@ -321,11 +321,41 @@
                     @else
                         @php($days = $slotsByDate->take(14))
                         @php($chosenDay = $chosenSlot ? $chosenSlot->date->toDateString() : $days->keys()->first())
-                        <fieldset x-data="{ day: @js($chosenDay) }">
-                            <legend class="text-sm font-bold text-navy-900">1. Pick a day</legend>
+                        {{-- min-w-0: a fieldset will not shrink below its content otherwise, so the day row could not scroll --}}
+                        <fieldset
+                            x-data="{
+                                day: @js($chosenDay),
+                                atStart: true,
+                                atEnd: false,
+                                measure() {
+                                    const row = this.$refs.days;
+                                    this.atStart = row.scrollLeft <= 4;
+                                    this.atEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+                                },
+                                scrollDays(direction) {
+                                    this.$refs.days.scrollBy({ left: direction * this.$refs.days.clientWidth * 0.8, behavior: 'smooth' });
+                                },
+                            }"
+                            x-init="$nextTick(() => measure())"
+                            @resize.window.debounce.150ms="measure()"
+                            class="relative min-w-0"
+                        >
+                            <legend class="py-2 text-sm font-bold text-navy-900">1. Pick a day</legend>
+                            <div class="absolute top-0 right-0 flex gap-1.5 sm:hidden">
+                                <button type="button" @click="scrollDays(-1)" :disabled="atStart" aria-label="Earlier dates" class="flex size-9 items-center justify-center rounded-full border border-ice-100 bg-white text-navy-900 transition hover:border-royal-600 hover:text-royal-600 disabled:cursor-default disabled:opacity-40 disabled:hover:border-ice-100 disabled:hover:text-navy-900">
+                                    <x-heroicon-m-chevron-left class="size-5" aria-hidden="true" />
+                                </button>
+                                <button type="button" @click="scrollDays(1)" :disabled="atEnd" aria-label="Later dates" class="flex size-9 items-center justify-center rounded-full border border-ice-100 bg-white text-navy-900 transition hover:border-royal-600 hover:text-royal-600 disabled:cursor-default disabled:opacity-40 disabled:hover:border-ice-100 disabled:hover:text-navy-900">
+                                    <x-heroicon-m-chevron-right class="size-5" aria-hidden="true" />
+                                </button>
+                            </div>
 
-                            {{-- Days: one swipeable row --}}
-                            <div class="-mx-5 mt-2 flex snap-x gap-2 overflow-x-auto px-5 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+                            {{-- Days: one swipeable row on phones, wrapped from sm up --}}
+                            <div
+                                x-ref="days"
+                                @scroll.debounce.50ms="measure()"
+                                class="-mx-5 mt-2 flex snap-x gap-2 overflow-x-auto scroll-smooth px-5 pb-2 [scrollbar-width:thin] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+                            >
                                 @foreach ($days as $date => $daySlots)
                                     @php($day = $daySlots->first()->date)
                                     <button
