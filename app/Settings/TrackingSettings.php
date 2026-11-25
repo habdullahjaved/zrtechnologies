@@ -50,6 +50,8 @@ class TrackingSettings extends Settings
 
     public ?string $tiktok_pixel_id;
 
+    public ?string $pinterest_tag_id;
+
     /** Sends server events as tests (Meta test events, GA4 debug) and logs them as tests. */
     public bool $test_mode;
 

@@ -61,6 +61,33 @@ class SiteSettings extends Settings
     /** Show the "coming soon" teaser for future services on the home page. */
     public bool $show_coming_soon;
 
+    /** Google Search Console HTML-tag verification code. */
+    public ?string $google_site_verification;
+
+    /** Bing Webmaster Tools verification code (msvalidate.01). */
+    public ?string $bing_site_verification;
+
+    /** Pinterest website claim code (p:domain_verify). */
+    public ?string $pinterest_site_verification;
+
+    /** Meta Business Manager domain verification code. */
+    public ?string $facebook_domain_verification;
+
+    /**
+     * Verification meta tags for the page head, only those filled in.
+     *
+     * @return array<string, string>
+     */
+    public function verificationTags(): array
+    {
+        return array_filter([
+            'google-site-verification' => $this->google_site_verification,
+            'msvalidate.01' => $this->bing_site_verification,
+            'p:domain_verify' => $this->pinterest_site_verification,
+            'facebook-domain-verification' => $this->facebook_domain_verification,
+        ], filled(...));
+    }
+
     public static function group(): string
     {
         return 'site';

@@ -5,7 +5,7 @@
  * This module:
  *  - loads Google's tag (or Google Tag Manager) straight away, which only
  *    sets cookies once the visitor consents (Consent Mode v2);
- *  - loads the Meta Pixel, TikTok Pixel and Microsoft Clarity only after the
+ *  - loads the Meta Pixel, TikTok Pixel, Pinterest Tag and Microsoft Clarity only after the
  *    matching consent;
  *  - sends website events through one function, zrTrack(), which pushes to
  *    the dataLayer (for GTM) and, without GTM, calls Google and Meta directly.
@@ -94,6 +94,22 @@ function loadTikTok() {
     window.ttq.page();
 }
 
+function loadPinterest() {
+    if (!config.pinterest || window.pintrk) {
+        return;
+    }
+
+    window.pintrk = function () {
+        window.pintrk.queue.push(Array.prototype.slice.call(arguments));
+    };
+    window.pintrk.queue = [];
+    window.pintrk.version = '3.0';
+
+    loadScript('pinterest', 'https://s.pinimg.com/ct/core.js');
+    window.pintrk('load', config.pinterest);
+    window.pintrk('page');
+}
+
 function loadClarity() {
     if (!config.clarity || window.clarity) {
         return;
@@ -123,6 +139,7 @@ export function applyConsent(consent) {
     if (consent.marketing) {
         loadMetaPixel();
         loadTikTok();
+        loadPinterest();
     } else if (window.fbq) {
         window.fbq('consent', 'revoke');
     }
@@ -140,6 +157,12 @@ const META_EVENTS = {
     click_whatsapp: ['Contact'],
     booking_step_1: ['InitiateCheckout'],
     view_price: ['ViewContent'],
+};
+
+/** Pinterest Tag events for each website event. */
+const PINTEREST_EVENTS = {
+    book_repair: 'lead',
+    generate_lead: 'lead',
 };
 
 /**
@@ -192,6 +215,13 @@ export function track(name, params = {}) {
         const data = eventParams.value ? { value: eventParams.value, currency: eventParams.currency || 'GBP' } : {};
 
         metaEvents.forEach((metaEvent) => window.fbq('track', metaEvent, data, eventParams.event_id ? { eventID: eventParams.event_id } : {}));
+    }
+
+    if (window.pintrk && window.zrConsent?.marketing && PINTEREST_EVENTS[name]) {
+        window.pintrk('track', PINTEREST_EVENTS[name], {
+            ...(eventParams.value ? { value: eventParams.value, currency: eventParams.currency || 'GBP' } : {}),
+            ...(eventParams.event_id ? { event_id: eventParams.event_id } : {}),
+        });
     }
 }
 

@@ -59,6 +59,8 @@ class TrackingHealth extends Page
             ['label' => 'Meta Pixel (website)', 'ok' => filled($settings->meta_pixel_id), 'detail' => $settings->meta_pixel_id ?: 'Add the Pixel ID'],
             ['label' => 'Meta Conversions API (server)', 'ok' => $settings->metaServerConfigured(), 'detail' => $settings->metaServerConfigured() ? 'Ready' : 'Add the access token'],
             ['label' => 'Microsoft Clarity', 'ok' => filled($settings->clarity_project_id), 'detail' => $settings->clarity_project_id ?: 'Optional'],
+            ['label' => 'TikTok Pixel', 'ok' => filled($settings->tiktok_pixel_id), 'detail' => $settings->tiktok_pixel_id ?: 'Optional'],
+            ['label' => 'Pinterest Tag', 'ok' => filled($settings->pinterest_tag_id), 'detail' => $settings->pinterest_tag_id ?: 'Optional'],
             ['label' => 'Test mode', 'ok' => ! $settings->test_mode, 'detail' => $settings->test_mode ? 'On: switch off before launch' : 'Off (live)'],
         ];
     }

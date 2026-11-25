@@ -43,7 +43,7 @@ class ManageTrackingSettings extends BaseSettingsPage
     {
         return $schema->components([
             Section::make('Google Tag Manager')
-                ->description('Optional. With a container ID, the website sends its events to Tag Manager and your tags there decide what fires (import docs/gtm-container.json to start). Leave it empty to let the website load Google Analytics, Google Ads, Meta and Clarity itself.')
+                ->description('Optional. With a container ID, the website sends its events to Tag Manager and your tags there decide what fires (import docs/gtm-container.json to start). Leave it empty to let the website load Google Analytics, Google Ads, Meta, TikTok, Pinterest and Clarity itself.')
                 ->columnSpanFull()
                 ->schema([
                     TextInput::make('gtm_container_id')
@@ -125,6 +125,12 @@ class ManageTrackingSettings extends BaseSettingsPage
                         ->label('TikTok Pixel ID')
                         ->helperText('Loads only for visitors who accept marketing cookies.')
                         ->maxLength(40),
+                    TextInput::make('pinterest_tag_id')
+                        ->label('Pinterest Tag ID')
+                        ->helperText('Pinterest Ads → Conversions → Pinterest Tag (the number). Loads only for visitors who accept marketing cookies. The website verification code goes in Settings → Website & SEO.')
+                        ->regex('/^\d{6,20}$/')
+                        ->validationMessages(['regex' => 'The Pinterest Tag ID is a number, e.g. 2612345678901.'])
+                        ->maxLength(20),
                 ]),
             Section::make('Testing')
                 ->columnSpanFull()

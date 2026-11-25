@@ -45,6 +45,16 @@ class ManageSiteSettings extends BaseSettingsPage
                             ? 'Switch on at launch. When off, every page tells search engines not to index it.'
                             : 'This only takes effect on the live (production) website. Other environments are never indexed.'),
                 ]),
+            Section::make('Site verification')
+                ->description('Paste the code each service gives you for the "HTML tag" / "meta tag" method. You can paste the whole <meta ...> tag: only the code is kept. Each tag is added to every page.')
+                ->columns(2)
+                ->columnSpanFull()
+                ->schema([
+                    self::verificationInput('google_site_verification', 'Google Search Console', 'Search Console → Add property → URL prefix → HTML tag.'),
+                    self::verificationInput('bing_site_verification', 'Bing Webmaster Tools', 'Bing Webmaster Tools → Add site → HTML Meta Tag (msvalidate.01). Or import from Search Console instead.'),
+                    self::verificationInput('pinterest_site_verification', 'Pinterest', 'Pinterest business account → Settings → Claimed accounts → Website → Add HTML tag.'),
+                    self::verificationInput('facebook_domain_verification', 'Meta (Facebook) domain', 'Meta Business Suite → Settings → Brand safety → Domains → Meta-tag verification.'),
+                ]),
             Section::make('Default titles and descriptions')
                 ->columns(2)
                 ->columnSpanFull()
@@ -172,5 +182,30 @@ class ManageSiteSettings extends BaseSettingsPage
                         ->maxLength(400),
                 ]),
         ]);
+    }
+
+    private static function verificationInput(string $name, string $label, string $helperText): TextInput
+    {
+        return TextInput::make($name)
+            ->label($label)
+            ->helperText($helperText)
+            ->maxLength(300)
+            ->dehydrateStateUsing(fn (?string $state): ?string => self::verificationCode($state));
+    }
+
+    /**
+     * Keeps only the code when a whole meta tag or a "name=code" TXT value is pasted.
+     */
+    public static function verificationCode(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        if (preg_match('/content\s*=\s*["\']([^"\']+)["\']/i', $value, $matches) === 1) {
+            $value = trim($matches[1]);
+        } elseif (preg_match('/^[a-z0-9_.:-]+-verification=(.+)$/i', $value, $matches) === 1) {
+            $value = trim($matches[1]);
+        }
+
+        return $value === '' ? null : $value;
     }
 }

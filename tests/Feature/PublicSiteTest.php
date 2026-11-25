@@ -66,10 +66,13 @@ it('is never indexable outside production', function () {
 it('is indexable in production only when switched on in settings', function () {
     app()->detectEnvironment(fn () => 'production');
 
+    $site = app(SiteSettings::class);
+    $site->allow_indexing = false;
+    $site->save();
+
     $this->get(route('home'))->assertSee('<meta name="robots" content="noindex, nofollow">', false);
     expect(explode("\n", $this->get('/robots.txt')->getContent()))->toContain('Disallow: /');
 
-    $site = app(SiteSettings::class);
     $site->allow_indexing = true;
     $site->save();
 

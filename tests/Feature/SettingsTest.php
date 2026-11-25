@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\Settings\ManageSiteSettings;
 use App\Settings\BusinessSettings;
 use App\Settings\OpeningHoursSettings;
 use App\Settings\SiteSettings;
@@ -19,8 +20,8 @@ it('seeds the business facts from the brief', function () {
         ->and($business->show_street_address)->toBeFalse();
 });
 
-it('starts with indexing switched off and only the Google Business Profile linked', function () {
-    expect(app(SiteSettings::class)->allow_indexing)->toBeFalse()
+it('starts with indexing switched on and only the Google Business Profile linked', function () {
+    expect(app(SiteSettings::class)->allow_indexing)->toBeTrue()
         ->and(app(SocialSettings::class)->sameAs())->toBe(['https://share.google/rC3I3iXS9seMC8iDk'])
         ->and(app(SocialSettings::class)->filledNetworks())->toBe([]);
 });
@@ -98,3 +99,27 @@ it('lists only filled social profiles', function () {
         'https://www.facebook.com/zrtechnologies',
     ]);
 });
+
+it('adds the site verification tags set in the admin to every page', function () {
+    $site = app(SiteSettings::class);
+    $site->google_site_verification = 'google-code-123';
+    $site->pinterest_site_verification = 'pinterest-abc';
+    $site->save();
+
+    $this->get(route('home'))
+        ->assertSee('<meta name="google-site-verification" content="google-code-123">', false)
+        ->assertSee('<meta name="p:domain_verify" content="pinterest-abc">', false)
+        ->assertDontSee('msvalidate.01', false)
+        ->assertDontSee('facebook-domain-verification', false);
+});
+
+it('keeps only the code when a whole verification tag is pasted', function (?string $pasted, ?string $kept) {
+    expect(ManageSiteSettings::verificationCode($pasted))->toBe($kept);
+})->with([
+    'meta tag' => ['<meta name="p:domain_verify" content="abc123"/>', 'abc123'],
+    'single quotes' => ["<meta name='msvalidate.01' content='B1C2D3' />", 'B1C2D3'],
+    'DNS TXT value' => ['google-site-verification=XyZ_987-a', 'XyZ_987-a'],
+    'plain code' => ['  plain-code  ', 'plain-code'],
+    'empty' => ['', null],
+    'null' => [null, null],
+]);

@@ -43,6 +43,7 @@ class TrackingHead extends Component
             'meta' => $tracking->meta_pixel_id ?: null,
             'clarity' => $tracking->clarity_project_id ?: null,
             'tiktok' => $tracking->tiktok_pixel_id ?: null,
+            'pinterest' => $tracking->pinterest_tag_id ?: null,
             'testMode' => $tracking->test_mode,
             'policyVersion' => $consent->policy_version,
             'consentUrl' => route('consent.store'),

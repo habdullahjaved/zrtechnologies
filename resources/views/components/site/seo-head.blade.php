@@ -2,6 +2,9 @@
 <meta name="description" content="{{ $description }}">
 <meta name="robots" content="{{ $robots }}">
 <link rel="canonical" href="{{ $canonical }}">
+@foreach ($site->verificationTags() as $verificationName => $verificationCode)
+    <meta name="{{ $verificationName }}" content="{{ $verificationCode }}">
+@endforeach
 
 <meta property="og:type" content="{{ $seo->type }}">
 <meta property="og:site_name" content="{{ $site->site_name }}">
