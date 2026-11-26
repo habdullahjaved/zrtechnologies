@@ -36,7 +36,7 @@
         <div class="mt-6 space-y-4">
             <p class="font-heading text-5xl font-extrabold text-navy-900">Montserrat ExtraBold, headings</p>
             <p class="font-heading text-3xl font-bold text-navy-900">Montserrat Bold, sub-headings</p>
-            <p class="max-w-2xl text-lg leading-relaxed">Inter, body text. We collect your iPhone, repair it with quality parts and bring it back to you, with a warranty on every repair. Prices from £49.</p>
+            <p class="max-w-2xl text-lg leading-relaxed">Inter, body text. We collect your iPhone, repair it with quality parts and bring it back to you, with a warranty on every repair.</p>
         </div>
     </x-ui.section>
 

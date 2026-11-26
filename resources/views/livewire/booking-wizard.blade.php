@@ -3,7 +3,7 @@
     $lines = $this->summaryLines;
     $nextAction = match ($step) { 2 => 'submitDevice', 3 => 'submitRepairs', 4 => 'submitCollection', 5 => 'submitDetails', 6 => 'confirm', default => 'checkPostcode' };
     $nextLabel = match ($step) { 2 => $model ? 'Continue' : 'Choose your iPhone', 5 => 'Review booking', 6 => 'Confirm booking', default => 'Continue' };
-    $nextDisabled = $step === 2 && ! $model;
+    $nextDisabled = ($step === 2 && ! $model) || ($step === 4 && $this->slot === '');
 @endphp
 
 {{-- Each new step: report it, and bring the top of the form into view (no scrolling back up). --}}
@@ -62,7 +62,7 @@
                     <x-form.input
                         name="postcode"
                         label="Postcode"
-                        wire:model="postcode"
+                        wire:model.live.debounce.300ms="postcode"
                         autocomplete="postal-code"
                         autocapitalize="characters"
                         spellcheck="false"
@@ -99,10 +99,10 @@
 
                             <form wire:submit="requestOutOfAreaHelp" class="mt-5 grid gap-4 sm:grid-cols-2" novalidate>
                                 <x-form.honeypot />
-                                <x-form.input name="outOfAreaName" label="Your name" wire:model="outOfAreaName" autocomplete="name" class="sm:col-span-2" required />
-                                <x-form.input name="outOfAreaPhone" label="Mobile" type="tel" wire:model="outOfAreaPhone" autocomplete="tel" inputmode="tel" />
-                                <x-form.input name="outOfAreaEmail" label="Email" type="email" wire:model="outOfAreaEmail" autocomplete="email" />
-                                <x-form.textarea name="outOfAreaMessage" label="What’s wrong with your iPhone?" wire:model="outOfAreaMessage" rows="3" class="sm:col-span-2" optional />
+                                <x-form.input name="outOfAreaName" label="Your name" wire:model.live.debounce.300ms="outOfAreaName" autocomplete="name" class="sm:col-span-2" required />
+                                <x-form.input name="outOfAreaPhone" label="Mobile" type="tel" wire:model.live.debounce.300ms="outOfAreaPhone" autocomplete="tel" inputmode="tel" />
+                                <x-form.input name="outOfAreaEmail" label="Email" type="email" wire:model.live.debounce.300ms="outOfAreaEmail" autocomplete="email" />
+                                <x-form.textarea name="outOfAreaMessage" label="What’s wrong with your iPhone?" wire:model.live.debounce.300ms="outOfAreaMessage" rows="3" class="sm:col-span-2" optional />
                                 <div class="flex flex-wrap gap-3 sm:col-span-2">
                                     <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="requestOutOfAreaHelp">
                                         {{ $settings->post_in_enabled ? 'Send me post-in details' : 'Ask us to get in touch' }}
@@ -215,7 +215,7 @@
             {{-- Step 3: repairs --}}
             @if ($step === 3 && $model)
                 <h2 class="text-2xl font-bold">What needs fixing on your {{ $model->name }}?</h2>
-                <p class="mt-2">Choose one or more repairs. Prices include parts and labour.</p>
+                <p class="mt-2">Choose one or more repairs. We’ll confirm the repair details with you before we begin.</p>
 
                 <form wire:submit="submitRepairs" class="mt-6" novalidate>
                     <fieldset>
@@ -234,14 +234,11 @@
                                 ])>
                                     <label class="flex cursor-pointer items-start gap-3">
                                         <input type="checkbox" value="{{ $repairId }}" wire:model.live="selectedRepairs" class="mt-1 size-5 shrink-0 rounded border-slate-400 text-royal-600 focus:ring-2 focus:ring-sky-400/40">
+                                        @if ($repair->icon)
+                                            <img src="{{ asset("images/icons/icon-{$repair->icon}-navy-96.webp") }}" alt="" width="44" height="44" loading="lazy" class="size-11 shrink-0 rounded-xl bg-ice-50 p-1.5">
+                                        @endif
                                         <span class="min-w-0 flex-1">
-                                            <span class="flex flex-wrap items-baseline justify-between gap-2">
-                                                <span class="font-bold text-navy-900">{{ $repair->name }}</span>
-                                                <span class="font-heading font-extrabold text-navy-900">
-                                                    @if ($options->count() > 1 || $repair->requires_diagnosis)<span class="text-sm font-normal text-ink">from</span>@endif
-                                                    {{ $options->min(fn ($price) => $price->effectivePricePence()) === 0 ? 'Free' : \App\Support\Money::format($options->min(fn ($price) => $price->effectivePricePence())) }}
-                                                </span>
-                                            </span>
+                                            <span class="font-bold text-navy-900">{{ $repair->name }}</span>
                                             @if ($repair->summary)
                                                 <span class="mt-1 block text-sm leading-relaxed">{{ $repair->summary }}</span>
                                             @endif
@@ -263,7 +260,6 @@
                                                         <span class="min-w-0 flex-1">
                                                             <span class="flex justify-between gap-2 font-semibold text-navy-900">
                                                                 <span>{{ $option->partQuality->name ?? 'Standard' }}</span>
-                                                                <span>{{ $option->formattedPrice() }}</span>
                                                             </span>
                                                             @if ($option->partQuality?->description)
                                                                 <span class="mt-0.5 block text-ink">{{ $option->partQuality->description }}</span>
@@ -277,7 +273,7 @@
                                             </div>
                                         </fieldset>
                                     @elseif ($isChosen && ($warranty = $options->first()->warrantyLabel()))
-                                        <p class="mt-2 text-sm sm:ml-8">{{ $warranty }} warranty{{ $repair->requires_diagnosis ? ' · final price confirmed after diagnosis' : '' }}</p>
+                                        <p class="mt-2 text-sm sm:ml-8">{{ $warranty }} warranty{{ $repair->requires_diagnosis ? ' · we’ll discuss the diagnosis with you first' : '' }}</p>
                                     @endif
                                 </li>
                             @endforeach
@@ -291,11 +287,11 @@
                         <p class="mt-3 text-sm font-medium text-danger-600">{{ $message }}</p>
                     @enderror
 
-                    @if ($diagnostics)
+                    @if ($hasDiagnostics)
                         <div class="mt-5 flex flex-col gap-3 rounded-2xl border-2 border-dashed border-sky-200 p-4 transition hover:border-royal-600/60 hover:bg-ice-50/60 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p class="font-bold text-navy-900">Not sure what’s wrong?</p>
-                                <p class="text-sm">We test every function and give you a fixed quote before any repair: {{ $diagnostics->effectivePricePence() === 0 ? 'free' : $diagnostics->formattedPrice() }}.</p>
+                                <p class="text-sm">We test every function and explain what we find before any repair begins.</p>
                             </div>
                             <x-ui.button variant="secondary" wire:click="chooseDiagnostics">Book a diagnosis</x-ui.button>
                         </div>
@@ -314,17 +310,18 @@
                 <p class="mt-2">Choose a time window. The driver will text you when they are on the way.</p>
 
                 <form wire:submit="submitCollection" class="mt-6" novalidate>
-                    @if ($slotsByDate->isEmpty())
+                    <div @class(['hidden' => $slotsByDate->isNotEmpty()])>
                         <x-ui.alert tone="warning" title="No collection times are available online right now.">
                             Please call or message us and we will find a time that works for you.
                         </x-ui.alert>
-                    @else
+                    </div>
+
                         @php($days = $slotsByDate->take(14))
-                        @php($chosenDay = $chosenSlot ? $chosenSlot->date->toDateString() : $days->keys()->first())
+                        @php($chosenDay = $days->has($selectedDate) ? $selectedDate : ($chosenSlot ? $chosenSlot->date->toDateString() : $days->keys()->first()))
+                        @php($chosenDaySlots = $days->get($chosenDay, collect()))
                         {{-- min-w-0: a fieldset will not shrink below its content otherwise, so the day row could not scroll --}}
                         <fieldset
                             x-data="{
-                                day: @js($chosenDay),
                                 atStart: true,
                                 atEnd: false,
                                 measure() {
@@ -338,9 +335,9 @@
                             }"
                             x-init="$nextTick(() => measure())"
                             @resize.window.debounce.150ms="measure()"
-                            class="relative min-w-0"
+                            @class(['relative min-w-0', 'hidden' => $slotsByDate->isEmpty()])
                         >
-                            <legend class="py-2 text-sm font-bold text-navy-900">1. Pick a day</legend>
+                            <legend class="py-2 text-sm font-bold text-navy-900">1. Choose a collection day</legend>
                             <div class="absolute top-0 right-0 flex gap-1.5 sm:hidden">
                                 <button type="button" @click="scrollDays(-1)" :disabled="atStart" aria-label="Earlier dates" class="flex size-9 items-center justify-center rounded-full border border-ice-100 bg-white text-navy-900 transition hover:border-royal-600 hover:text-royal-600 disabled:cursor-default disabled:opacity-40 disabled:hover:border-ice-100 disabled:hover:text-navy-900">
                                     <x-heroicon-m-chevron-left class="size-5" aria-hidden="true" />
@@ -361,10 +358,13 @@
                                     <button
                                         type="button"
                                         wire:key="day-{{ $date }}"
-                                        @click="day = @js($date)"
-                                        :aria-pressed="(day === @js($date)).toString()"
-                                        :class="day === @js($date) ? 'border-royal-600 bg-royal-600 text-white shadow-soft' : 'border-ice-100 bg-white text-navy-900 hover:border-royal-600 hover:bg-ice-50'"
-                                        class="flex w-[4.75rem] shrink-0 snap-start flex-col items-center rounded-2xl border px-2 py-3 transition duration-150 motion-safe:hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-sky-400"
+                                        wire:click="chooseCollectionDate('{{ $date }}')"
+                                        aria-pressed="{{ $chosenDay === $date ? 'true' : 'false' }}"
+                                        @class([
+                                            'flex w-[4.75rem] shrink-0 snap-start flex-col items-center rounded-2xl border px-2 py-3 transition duration-150 motion-safe:hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-sky-400',
+                                            'border-royal-600 bg-royal-600 text-white shadow-soft' => $chosenDay === $date,
+                                            'border-ice-100 bg-white text-navy-900 hover:border-royal-600 hover:bg-ice-50' => $chosenDay !== $date,
+                                        ])
                                     >
                                         <span class="text-xs font-semibold uppercase opacity-80">{{ $day->isToday() ? 'Today' : ($day->isTomorrow() ? 'Tmrw' : $day->format('D')) }}</span>
                                         <span class="font-heading text-2xl leading-tight font-extrabold">{{ $day->format('j') }}</span>
@@ -374,22 +374,24 @@
                             </div>
 
                             <p class="mt-5 text-sm font-bold text-navy-900">2. Pick a time window</p>
-                            @foreach ($days as $date => $daySlots)
-                                <div x-show="day === @js($date)" @if ($date !== $chosenDay) x-cloak @endif class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-3" wire:key="slots-{{ $date }}">
-                                    @foreach ($daySlots as $collectionSlot)
-                                        @php($isSelected = $slot === $collectionSlot->key())
-                                        <label wire:key="slot-{{ $collectionSlot->key() }}" @class([
-                                            'group relative flex items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3.5 transition duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-sky-400',
-                                            'border-royal-600 bg-ice-50 shadow-soft' => $isSelected,
-                                            'border-ice-100 bg-white hover:border-royal-600/60 hover:bg-ice-50 hover:shadow-soft' => ! $isSelected,
-                                        ])>
-                                            <input type="radio" value="{{ $collectionSlot->key() }}" wire:model.live="slot" class="sr-only">
+                            <div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3" wire:key="slots-{{ $chosenDay }}">
+                                @foreach ($chosenDaySlots as $collectionSlot)
+                                        @php($isSelected = $this->slot === $collectionSlot->key())
+                                        <label
+                                            wire:key="slot-{{ $collectionSlot->key() }}"
+                                            @class([
+                                                'group relative flex min-h-20 w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3.5 text-left transition duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-sky-400',
+                                                'border-royal-600 bg-ice-50 shadow-soft' => $isSelected,
+                                                'border-ice-100 bg-white hover:border-royal-600/60 hover:bg-ice-50 hover:shadow-soft' => ! $isSelected,
+                                            ])
+                                        >
+                                            <input type="radio" value="{{ $collectionSlot->key() }}" wire:model.live="slot" @checked($isSelected) class="sr-only">
                                             <span>
                                                 <span class="block font-heading text-lg font-extrabold text-navy-900">{{ $collectionSlot->window->timeRange() }}</span>
                                                 <span class="block text-sm">{{ $collectionSlot->window->label }}
-                                                    @if ($collectionSlot->remaining <= 2)
+                                                    <span @class(['hidden' => $collectionSlot->remaining > 2])>
                                                         · <span class="font-semibold text-warning-700">{{ $collectionSlot->remaining }} left</span>
-                                                    @endif
+                                                    </span>
                                                 </span>
                                             </span>
                                             <span @class([
@@ -400,11 +402,9 @@
                                                 <x-heroicon-s-check class="size-4" aria-hidden="true" />
                                             </span>
                                         </label>
-                                    @endforeach
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </fieldset>
-                    @endif
                     @error('slot')
                         <p class="mt-3 text-sm font-medium text-danger-600">{{ $message }}</p>
                     @enderror
@@ -423,16 +423,16 @@
 
                     @if ($returnTo === 'different')
                         <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                            <x-form.input name="returnLine1" label="Address line 1" wire:model="returnLine1" autocomplete="off" class="sm:col-span-2" required />
-                            <x-form.input name="returnLine2" label="Address line 2" wire:model="returnLine2" autocomplete="off" class="sm:col-span-2" optional />
-                            <x-form.input name="returnTown" label="Town" wire:model="returnTown" required />
-                            <x-form.input name="returnPostcode" label="Postcode" wire:model="returnPostcode" autocapitalize="characters" maxlength="10" required />
+                            <x-form.input name="returnLine1" label="Address line 1" wire:model.live.debounce.300ms="returnLine1" autocomplete="off" class="sm:col-span-2" required />
+                            <x-form.input name="returnLine2" label="Address line 2" wire:model.live.debounce.300ms="returnLine2" autocomplete="off" class="sm:col-span-2" optional />
+                            <x-form.input name="returnTown" label="Town" wire:model.live.debounce.300ms="returnTown" required />
+                            <x-form.input name="returnPostcode" label="Postcode" wire:model.live.debounce.300ms="returnPostcode" autocapitalize="characters" maxlength="10" required />
                         </div>
                     @endif
 
                     <div class="mt-8 hidden flex-wrap justify-between gap-3 lg:flex">
                         <x-ui.button variant="ghost" wire:click="back">Back</x-ui.button>
-                        <x-ui.button type="submit" size="lg">Continue</x-ui.button>
+                        <x-ui.button type="submit" size="lg" :disabled="$this->slot === ''" wire:loading.attr="disabled" wire:target="slot">Continue</x-ui.button>
                     </div>
                 </form>
             @endif
@@ -443,13 +443,13 @@
                 <p class="mt-2">So we can confirm your booking and the driver can find you.</p>
 
                 <form wire:submit="submitDetails" class="mt-6 grid gap-4 sm:grid-cols-2" novalidate>
-                    <x-form.input name="firstName" label="First name" wire:model="firstName" autocomplete="given-name" required />
-                    <x-form.input name="lastName" label="Last name" wire:model="lastName" autocomplete="family-name" required />
-                    <x-form.input name="phone" label="Mobile number" type="tel" wire:model.blur="phone" autocomplete="tel" inputmode="tel" help="The driver texts this number on the day." required />
-                    <x-form.input name="email" label="Email" type="email" wire:model.blur="email" autocomplete="email" help="For your confirmation and repair updates." required />
-                    <x-form.input name="line1" label="Address line 1" wire:model="line1" autocomplete="address-line1" class="sm:col-span-2" required />
-                    <x-form.input name="line2" label="Address line 2" wire:model="line2" autocomplete="address-line2" class="sm:col-span-2" optional />
-                    <x-form.input name="town" label="Town" wire:model="town" autocomplete="address-level2" required />
+                    <x-form.input name="firstName" label="First name" wire:model.live.debounce.300ms="firstName" autocomplete="given-name" required />
+                    <x-form.input name="lastName" label="Last name" wire:model.live.debounce.300ms="lastName" autocomplete="family-name" required />
+                    <x-form.input name="phone" label="Mobile number" type="tel" wire:model.live.debounce.300ms="phone" autocomplete="tel" inputmode="tel" help="The driver texts this number on the day." required />
+                    <x-form.input name="email" label="Email" type="email" wire:model.live.debounce.300ms="email" autocomplete="email" help="For your confirmation and repair updates." required />
+                    <x-form.input name="line1" label="Address line 1" wire:model.live.debounce.300ms="line1" autocomplete="address-line1" class="sm:col-span-2" required />
+                    <x-form.input name="line2" label="Address line 2" wire:model.live.debounce.300ms="line2" autocomplete="address-line2" class="sm:col-span-2" optional />
+                    <x-form.input name="town" label="Town" wire:model.live.debounce.300ms="town" autocomplete="address-level2" required />
                     <div>
                         <p class="mb-1.5 block text-sm font-semibold text-navy-900">Postcode</p>
                         <p class="flex items-center justify-between rounded-xl border border-ice-100 bg-ice-50 px-4 py-3">
@@ -460,8 +460,8 @@
                     <details class="group rounded-xl border border-ice-100 px-4 py-3 sm:col-span-2" @if ($colour || $storage) open @endif>
                         <summary class="cursor-pointer text-sm font-semibold text-royal-600">Add your iPhone’s colour and storage (optional)</summary>
                         <div class="mt-3 grid gap-4 sm:grid-cols-2">
-                            <x-form.input name="colour" label="Colour" wire:model="colour" maxlength="40" placeholder="e.g. Midnight" optional />
-                            <x-form.input name="storage" label="Storage" wire:model="storage" maxlength="20" placeholder="e.g. 128GB" list="booking-storage-options" optional />
+                            <x-form.input name="colour" label="Colour" wire:model.live.debounce.300ms="colour" maxlength="40" placeholder="e.g. Midnight" optional />
+                            <x-form.input name="storage" label="Storage" wire:model.live.debounce.300ms="storage" maxlength="20" placeholder="e.g. 128GB" list="booking-storage-options" optional />
                             <datalist id="booking-storage-options">
                                 @foreach (['64GB', '128GB', '256GB', '512GB', '1TB', '2TB'] as $size)
                                     <option value="{{ $size }}"></option>
@@ -469,14 +469,14 @@
                             </datalist>
                         </div>
                     </details>
-                    <x-form.textarea name="notes" label="Anything we should know?" wire:model="notes" rows="3" class="sm:col-span-2" help="e.g. parking, a gate code, or more about the fault." optional />
+                    <x-form.textarea name="notes" label="Anything we should know?" wire:model.live.debounce.300ms="notes" rows="3" class="sm:col-span-2" help="e.g. parking, a gate code, or more about the fault." optional />
 
                     <x-ui.alert tone="info" title="Your passcode and data" class="sm:col-span-2">
                         {{ $settings->passcode_notice }}
                     </x-ui.alert>
 
                     <div class="grid gap-4 sm:col-span-2">
-                        <x-form.checkbox name="acceptTerms" wire:model="acceptTerms" required>
+                        <x-form.checkbox name="acceptTerms" wire:model.live="acceptTerms" required>
                             I have read and agree to the
                             @if (Route::has('legal.repair-terms'))
                                 <a href="{{ route('legal.repair-terms') }}" target="_blank" rel="noopener" class="font-semibold text-royal-600 underline">repair terms</a>,
@@ -485,10 +485,10 @@
                             @endif
                             including backing up my iPhone before collection.
                         </x-form.checkbox>
-                        <x-form.checkbox name="startStraightAway" wire:model="startStraightAway">
+                        <x-form.checkbox name="startStraightAway" wire:model.live="startStraightAway">
                             Please start my repair straight away. I understand I can cancel free of charge until the repair starts, and that once it is complete my 14-day right to cancel ends. If you leave this unticked we will check with you before starting.
                         </x-form.checkbox>
-                        <x-form.checkbox name="marketingConsent" wire:model="marketingConsent">
+                        <x-form.checkbox name="marketingConsent" wire:model.live="marketingConsent">
                             Send me occasional tips and offers by email. You can unsubscribe at any time.
                         </x-form.checkbox>
                     </div>
@@ -517,7 +517,7 @@
                 <dl class="mt-6 divide-y divide-ice-100 rounded-2xl border border-ice-100">
                     @foreach ([
                         ['label' => 'Device', 'value' => collect([$model->name, $colour, $storage])->filter()->implode(', '), 'step' => $colour || $storage ? 5 : 2],
-                        ['label' => 'Repairs', 'value' => collect($lines)->map(fn ($line) => $line['label'].($line['quality'] ? ' ('.$line['quality'].')' : '').': '.$line['price'])->implode("\n"), 'step' => 3],
+                        ['label' => 'Repairs', 'value' => collect($lines)->map(fn ($line) => $line['label'].($line['quality'] ? ' ('.$line['quality'].')' : ''))->implode("\n"), 'step' => 3],
                         ['label' => 'Collection', 'value' => $chosenSlot?->label() ?? '', 'step' => 4],
                         ['label' => 'Address', 'value' => collect([$line1, $line2, $town, $postcode])->filter()->implode(', '), 'step' => 5],
                         ['label' => 'Return to', 'value' => $returnTo === 'different' ? collect([$returnLine1, $returnLine2, $returnTown, $returnPostcode])->filter()->implode(', ') : 'Same address', 'step' => 4],
@@ -531,12 +531,7 @@
                     @endforeach
                 </dl>
 
-                <div class="mt-6 rounded-2xl bg-ice-50 p-5">
-                    <div class="flex justify-between text-sm"><span>Repairs</span><span class="font-semibold text-navy-900">{{ $repairsTotal }}</span></div>
-                    <div class="mt-1.5 flex justify-between text-sm"><span>Collection &amp; return</span><span class="font-semibold text-navy-900">{{ $collectionFee }}</span></div>
-                    <div class="mt-3 flex justify-between border-t border-ice-100 pt-3"><span class="font-bold text-navy-900">Estimated total</span><span class="font-heading text-xl font-extrabold text-navy-900">{{ $estimatedTotal }}</span></div>
-                    <p class="mt-3 text-sm">{{ $settings->payment_note }}</p>
-                </div>
+                <p class="mt-6 rounded-2xl bg-ice-50 p-5 text-sm">We’ll confirm the repair details with you before any work begins.</p>
 
                 <form wire:submit="confirm" class="mt-8 hidden flex-wrap items-center justify-between gap-3 lg:flex" novalidate>
                     <x-form.honeypot />
@@ -572,10 +567,7 @@
                         <dt class="font-semibold text-navy-900">Repairs</dt>
                         <dd>
                             @forelse ($lines as $line)
-                                <div class="flex justify-between gap-2">
-                                    <span>{{ $line['label'].($line['quality'] ? ' ('.$line['quality'].')' : '') }}</span>
-                                    <span class="font-semibold text-navy-900">{{ $line['price'] }}</span>
-                                </div>
+                                <div>{{ $line['label'].($line['quality'] ? ' ('.$line['quality'].')' : '') }}</div>
                             @empty
                                 Not chosen yet
                             @endforelse
@@ -585,19 +577,7 @@
                         <dt class="font-semibold text-navy-900">Collection</dt>
                         <dd>{{ $chosenSlot?->label() ?? 'Not chosen yet' }}</dd>
                     </div>
-                    @if ($serviceAreaId)
-                        <div class="flex justify-between">
-                            <dt class="font-semibold text-navy-900">Collection &amp; return</dt>
-                            <dd>{{ $collectionFee }}</dd>
-                        </div>
-                    @endif
                 </dl>
-                @if ($lines !== [])
-                    <div class="mt-4 flex items-baseline justify-between border-t border-ice-100 pt-4">
-                        <span class="font-bold text-navy-900">Estimated total</span>
-                        <span class="font-heading text-xl font-extrabold text-navy-900">{{ $estimatedTotal }}</span>
-                    </div>
-                @endif
 
                 @if ($step >= 2 && $serviceAreaId)
                     <button
@@ -616,13 +596,13 @@
             </x-ui.card>
 
             <ul class="mt-4 grid gap-2 px-1 text-sm">
-                @foreach (["We never ask for your passcode", "Pay when your iPhone comes back", "We ask before any extra cost"] as $promise)
+                @foreach (["We never ask for your passcode", "We confirm details before repair", "Collection and return included in your booking"] as $promise)
                     <li class="flex items-center gap-2"><x-heroicon-s-check-circle class="size-5 shrink-0 text-success-600" aria-hidden="true" />{{ $promise }}</li>
                 @endforeach
             </ul>
         </aside>
     </div>
-    {{-- Always-visible action bar on phones: running total and the next step, like an app's checkout bar. --}}
+    {{-- Always-visible action bar on phones, like an app's checkout bar. --}}
     @if ($step >= 2 && $serviceAreaId)
         <div class="fixed inset-x-0 bottom-0 z-40 border-t border-ice-100 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_-12px_rgb(10_31_78/0.3)] backdrop-blur lg:hidden">
             <div class="mx-auto flex max-w-xl items-center gap-3">
@@ -636,13 +616,8 @@
                 </button>
 
                 <div class="min-w-0 flex-1 leading-tight">
-                    @if ($lines !== [])
-                        <span class="block text-xs">Estimated total</span>
-                        <span class="block font-heading text-lg font-extrabold text-navy-900">{{ $estimatedTotal }}</span>
-                    @else
-                        <span class="block text-xs">Step {{ $step }} of {{ count($stepLabels) }}</span>
-                        <span class="block truncate font-semibold text-navy-900">{{ $stepLabels[$step] }}</span>
-                    @endif
+                    <span class="block text-xs">Step {{ $step }} of {{ count($stepLabels) }}</span>
+                    <span class="block truncate font-semibold text-navy-900">{{ $stepLabels[$step] }}</span>
                 </div>
 
                 <button

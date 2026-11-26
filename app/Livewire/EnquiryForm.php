@@ -9,10 +9,10 @@ use App\Livewire\Concerns\ProtectsAgainstSpam;
 use App\Models\DeviceModel;
 use App\Models\RepairType;
 use App\Services\Attribution\AttributionTracker;
-use App\Services\Pricing\PricingService;
 use App\Support\Postcode;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -83,6 +83,12 @@ class EnquiryForm extends Component
     {
         $this->type = in_array($type, self::TYPES, true) ? $type : 'contact';
         $this->idPrefix = $idPrefix ?? 'enquiry-'.$this->type;
+        $model = request()->query('model');
+        $repair = request()->query('repair');
+        $postcode = request()->query('postcode');
+        $this->model = is_string($model) ? $model : '';
+        $this->repair = is_string($repair) ? $repair : '';
+        $this->postcode = is_string($postcode) ? $postcode : '';
     }
 
     public function submit(CaptureLead $capture, AttributionTracker $attribution): void
@@ -136,7 +142,7 @@ class EnquiryForm extends Component
     #[Computed]
     public function models(): Collection
     {
-        return app(PricingService::class)->modelsWithPrices();
+        return DeviceModel::query()->listed()->get();
     }
 
     /**
@@ -154,7 +160,7 @@ class EnquiryForm extends Component
             'callbackTimes' => self::CALLBACK_TIMES,
             'fleetSizes' => self::FLEET_SIZES,
             'submitLabel' => match ($this->type) {
-                'quote' => 'Get my quote',
+                'quote' => 'Request a quote',
                 'callback' => 'Request a callback',
                 'business' => 'Send enquiry',
                 default => 'Send message',
@@ -182,12 +188,16 @@ class EnquiryForm extends Component
         return match ($this->type) {
             'quote' => [
                 'name' => ['required', 'string', 'max:160'],
-                'phone' => ['nullable', 'required_without:email', $phone],
-                'email' => ['nullable', 'required_without:phone', 'email:rfc', 'max:255'],
-                'model' => ['required', 'string', 'max:80'],
-                'repair' => ['nullable', 'string', 'max:80'],
-                'postcode' => ['nullable', 'string', 'max:10'],
-                'message' => ['nullable', 'string', 'max:2000'],
+                'phone' => ['required', $phone],
+                'email' => ['nullable', 'email:rfc', 'max:255'],
+                'model' => ['required', 'string', Rule::in($this->models->pluck('slug')->all())],
+                'repair' => ['required', 'string', Rule::in($this->repairTypes->pluck('slug')->all())],
+                'postcode' => ['required', 'string', 'max:10', function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || Postcode::normalise($value) === null) {
+                        $fail('Please enter a full UK postcode, e.g. BB2 4NY.');
+                    }
+                }],
+                'message' => ['required', 'string', 'max:2000'],
             ],
             'callback' => [
                 'name' => ['required', 'string', 'max:160'],
@@ -226,8 +236,10 @@ class EnquiryForm extends Component
             'phone.phone' => 'Please enter a valid UK phone number, e.g. 07360 127538.',
             'email.email' => 'Please enter a valid email address.',
             'model.required' => 'Please choose your iPhone model.',
+            'repair.required' => 'Please choose the service you need.',
+            'postcode.required' => 'Please enter your postcode.',
             'companyName.required' => 'Please enter your organisation’s name.',
-            'message.required' => 'Please tell us how we can help.',
+            'message.required' => 'Please tell us how we can help or describe the repair.',
         ];
     }
 }

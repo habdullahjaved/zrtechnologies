@@ -91,9 +91,6 @@
                             @foreach ($serviceLinks as $link)
                                 <li><a href="{{ $link['url'] }}" class="hover:text-white">{{ $link['label'] }}</a></li>
                             @endforeach
-                            @if (Route::has('prices'))
-                                <li><a href="{{ route('prices') }}" class="font-semibold text-white hover:text-sky-400">All repair prices</a></li>
-                            @endif
                         </ul>
                     </div>
                 @endif

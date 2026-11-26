@@ -6,7 +6,6 @@
                 <x-heroicon-s-wrench-screwdriver class="size-5" aria-hidden="true" />
                 Book a collection in {{ $area->town }}
             </x-ui.button>
-            <x-ui.button :href="route('prices')" variant="outline-light" size="lg">See prices</x-ui.button>
         </div>
     </x-site.page-header>
 
@@ -32,8 +31,7 @@
             <x-ui.card padding="p-6">
                 <x-heroicon-o-truck class="size-7 text-royal-600" aria-hidden="true" />
                 <h2 class="mt-3 text-lg font-bold">Collection and return</h2>
-                <p class="mt-3 font-heading text-2xl font-extrabold text-navy-900">{{ $area->collectionFeeLabel() }}</p>
-                <p class="mt-1 text-[0.95rem]">for collecting and returning your iPhone in {{ $area->town }}.</p>
+                <p class="mt-3 text-[0.95rem] leading-relaxed">We’ll confirm collection and return details when we call about your repair.</p>
             </x-ui.card>
         </div>
     </x-ui.section>
@@ -70,11 +68,11 @@
     @if ($services->isNotEmpty())
         <x-ui.section tone="ice">
             <x-ui.section-heading eyebrow="Repairs in {{ $area->town }}" title="What we can fix">
-                The same fixed prices wherever we collect from.
+                Tell us which repair you need and we’ll discuss the full details with you.
             </x-ui.section-heading>
             <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ($services->take(8) as ['service' => $service, 'from_pence' => $fromPence])
-                    <li><x-site.service-card :name="$service->name" :url="$service->url()" :icon="$service->icon" :from-pence="$fromPence" /></li>
+                @foreach ($services->take(8) as ['service' => $service])
+                    <li><x-site.service-card :name="$service->name" :url="$service->url()" :icon="$service->icon" /></li>
                 @endforeach
             </ul>
         </x-ui.section>

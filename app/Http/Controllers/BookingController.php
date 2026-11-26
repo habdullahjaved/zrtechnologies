@@ -9,7 +9,6 @@ use App\Services\Seo\SeoResolver;
 use App\Settings\BookingSettings;
 use App\Settings\BusinessSettings;
 use App\Support\Messaging\MessageVariables;
-use App\Support\Money;
 use App\Support\Phone;
 use App\Support\Seo\SeoData;
 use Illuminate\Contracts\View\View;
@@ -56,8 +55,6 @@ class BookingController extends Controller
                     'event_id' => $job->lead?->event_id,
                     'reference' => $job->reference,
                     'lead_type' => 'booking',
-                    'value' => (float) Money::toPounds($job->estimatedTotalPence()),
-                    'currency' => 'GBP',
                     'device' => $job->deviceModel?->name,
                     'repairs' => $job->items->pluck('description')->all(),
                     'user_data' => array_filter(['email' => $job->customer->email, 'phone_number' => $job->customer->phone]),

@@ -156,13 +156,13 @@ final class ContentFields
                             ->required(),
                     ]),
                 Block::make('cta')
-                    ->label('Book this repair button')
+                    ->label('Repair quote button')
                     ->icon(Heroicon::OutlinedCursorArrowRays)
                     ->columns(2)
                     ->schema([
                         TextInput::make('title')->placeholder('Need it fixed? We collect, repair and return.')->maxLength(120)->columnSpanFull(),
                         Textarea::make('text')->rows(2)->maxLength(300)->columnSpanFull(),
-                        TextInput::make('button_label')->placeholder('Book this repair')->maxLength(40),
+                        TextInput::make('button_label')->placeholder('Request a quote')->maxLength(40),
                         Select::make('repair_type_id')
                             ->label('Prefill repair')
                             ->options(fn (): array => RepairType::query()->listed()->pluck('name', 'id')->all())

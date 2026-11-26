@@ -87,6 +87,20 @@ it('serves cached pages to anonymous visitors with their own CSRF token', functi
     expect($first->status())->toBe(404);
 });
 
+it('retires cached pages containing Livewire component state', function () {
+    config(['zr.page_cache.enabled' => true, 'zr.page_cache.store' => 'array']);
+
+    $cache = app(PageCache::class);
+    $key = 'page-cache:test-livewire-snapshot';
+    cache()->store('array')->put($key, [
+        'content' => '<div wire:snapshot="personalized-state"></div>',
+        'content_type' => 'text/html; charset=UTF-8',
+    ]);
+
+    expect($cache->get($key, 'test-token'))->toBeNull()
+        ->and(cache()->store('array')->has($key))->toBeFalse();
+});
+
 it('clears the page cache when content is saved', function () {
     config(['zr.page_cache.enabled' => true]);
     $page = Page::factory()->system(SystemPage::About)->create(['intro' => 'Original intro.']);

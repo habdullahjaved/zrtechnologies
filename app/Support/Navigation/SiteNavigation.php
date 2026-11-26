@@ -7,7 +7,6 @@ use App\Models\DeviceModel;
 use App\Models\MenuItem;
 use App\Models\ServiceArea;
 use App\Services\Content\ServiceDirectory;
-use App\Support\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Route;
@@ -29,7 +28,6 @@ final class SiteNavigation
      * @var list<array{label: string, route: string}>
      */
     public const array DEFAULT_HEADER = [
-        ['label' => 'Prices', 'route' => 'prices'],
         ['label' => 'How It Works', 'route' => 'how-it-works'],
         ['label' => 'Areas', 'route' => 'areas.index'],
         ['label' => 'Blog', 'route' => 'blog.index'],
@@ -91,9 +89,9 @@ final class SiteNavigation
     }
 
     /**
-     * The "iPhone Repair" mega menu: every repair page, popular models and the price list.
+     * The "iPhone Repair" mega menu: every repair page and popular models.
      *
-     * @return array{url: string, active: bool, services: list<array{label: string, url: string, icon: string|null, from: string|null}>, models: list<array{label: string, url: string}>, prices_url: string|null}|null
+     * @return array{url: string, active: bool, services: list<array{label: string, url: string, icon: string|null}>, models: list<array{label: string, url: string}>}|null
      */
     public function megaMenu(): ?array
     {
@@ -104,12 +102,10 @@ final class SiteNavigation
         $services = [];
 
         foreach ($this->directory->services() as $service) {
-            $from = $this->directory->fromPrice($service);
             $services[] = [
                 'label' => $service->name,
                 'url' => $service->url(),
                 'icon' => $service->icon,
-                'from' => $from !== null ? Money::format($from) : null,
             ];
         }
 
@@ -126,7 +122,6 @@ final class SiteNavigation
             'active' => request()->routeIs('repairs.*'),
             'services' => $services,
             'models' => $models,
-            'prices_url' => Route::has('prices') ? route('prices') : null,
         ];
     }
 

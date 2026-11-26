@@ -17,7 +17,7 @@
                     @foreach ([
                         ['icon' => 'heroicon-o-device-phone-mobile', 'title' => 'Get your iPhone ready', 'text' => $passcodeNotice],
                         ['icon' => 'heroicon-o-truck', 'title' => 'We collect it', 'text' => 'Our driver collects your iPhone '.($job->collectionSlotLabel() ? 'on '.$job->collectionSlotLabel() : 'at the time we agree').' and texts you when they are on the way.'],
-                        ['icon' => 'heroicon-o-wrench-screwdriver', 'title' => 'We repair it', 'text' => 'A technician checks and repairs your iPhone. If the price needs to change, we ask you first.'],
+                        ['icon' => 'heroicon-o-wrench-screwdriver', 'title' => 'We repair it', 'text' => 'A technician checks and repairs your iPhone. We contact you if anything needs discussing.'],
                         ['icon' => 'heroicon-o-home', 'title' => 'We bring it back', 'text' => $paymentNote],
                     ] as $index => $stage)
                         <li class="flex gap-4">
@@ -64,7 +64,7 @@
                             <dt class="font-semibold text-navy-900">Repairs</dt>
                             <dd>
                                 @foreach ($job->items as $item)
-                                    <div class="flex justify-between gap-2"><span>{{ $item->description }}</span><span class="font-semibold text-navy-900">{{ $item->formattedPrice() }}</span></div>
+                                    <div>{{ $item->description }}</div>
                                 @endforeach
                             </dd>
                         </div>
@@ -74,11 +74,10 @@
                         @if ($job->collectionAddress)
                             <div><dt class="font-semibold text-navy-900">Address</dt><dd>{{ $job->collectionAddress->oneLine() }}</dd></div>
                         @endif
-                        <div class="flex justify-between"><dt class="font-semibold text-navy-900">Collection &amp; return</dt><dd>{{ $job->collection_fee_pence > 0 ? \App\Support\Money::format($job->collection_fee_pence) : 'Free' }}</dd></div>
                     </dl>
                     <div class="mt-4 flex items-baseline justify-between border-t border-ice-100 pt-4">
-                        <span class="font-bold text-navy-900">Estimated total</span>
-                        <span class="font-heading text-xl font-extrabold text-navy-900">{{ $job->estimatedTotalLabel() }}</span>
+                        <span class="font-bold text-navy-900">Repair details</span>
+                        <span>We’ll confirm these with you directly.</span>
                     </div>
                 </x-ui.card>
             </aside>

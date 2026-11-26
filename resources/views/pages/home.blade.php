@@ -68,21 +68,21 @@
         </div>
     </section>
 
-    {{-- Instant price checker --}}
+    {{-- Booking wizard --}}
     <x-ui.section tone="ice">
-        <x-ui.section-heading eyebrow="Instant prices" title="Get your repair price in seconds">
-            Choose your iPhone to see the price of every repair, including parts and labour.
+        <x-ui.section-heading eyebrow="Book a repair" title="Choose your repair and collection time">
+            Select your iPhone model and repair, then choose a collection slot that works for you.
         </x-ui.section-heading>
 
-        <div class="mx-auto mt-12 max-w-5xl">
-            <livewire:price-checker id-prefix="home-price-checker" />
+        <div class="mt-12">
+            <livewire:booking-wizard />
         </div>
     </x-ui.section>
 
     {{-- How it works --}}
     <x-ui.section tone="white">
         <x-ui.section-heading eyebrow="How it works" title="Your iPhone fixed without leaving home">
-            Four simple steps from booking to having your phone back in your hand.
+            Book online, choose a collection time and we’ll take care of the rest.
         </x-ui.section-heading>
 
         <ol class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -112,25 +112,17 @@
     @if ($popularServices !== [])
         <x-ui.section tone="white" class="pt-0 sm:pt-0 lg:pt-0">
             <x-ui.section-heading eyebrow="Popular repairs" title="The repairs we do most">
-                Clear prices for every model. Choose your repair to get started.
+                Choose a repair to book it for your iPhone.
             </x-ui.section-heading>
 
             <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($popularServices as $item)
                     <li>
-                        <x-site.service-card :name="$item['name']" :url="$item['url']" :summary="$item['summary']" :icon="$item['icon']" :from-pence="$item['from_pence']" />
+                        <x-site.service-card :name="$item['name']" :url="$item['url']" :summary="$item['summary']" :icon="$item['icon']" />
                     </li>
                 @endforeach
             </ul>
 
-            @if (Route::has('prices'))
-                <div class="mt-10 text-center">
-                    <x-ui.button :href="route('prices')" variant="secondary">
-                        See all repair prices
-                        <x-heroicon-m-arrow-right class="size-4" aria-hidden="true" />
-                    </x-ui.button>
-                </div>
-            @endif
         </x-ui.section>
     @endif
 
@@ -148,7 +140,7 @@
                     ['icon' => 'heroicon-o-home-modern', 'title' => 'We come to you', 'text' => 'Collection and return to your home or workplace. No travelling, no waiting around in a shop.'],
                     ['icon' => 'heroicon-o-shield-check', 'title' => 'Warranty included', 'text' => 'Every repair is covered by our warranty, so you are protected if anything is not right.'],
                     ['icon' => 'heroicon-o-lock-closed', 'title' => 'Your data stays private', 'text' => 'We never ask for your passcode in a form, and we treat your phone and data with care.'],
-                    ['icon' => 'heroicon-o-currency-pound', 'title' => 'Clear prices first', 'text' => 'You see the price before you book. If anything changes after diagnosis, we ask before we carry on.'],
+                    ['icon' => 'heroicon-o-chat-bubble-left-right', 'title' => 'Clear repair details', 'text' => 'We confirm the repair details with you before any work begins.'],
                 ] as $benefit)
                     <li class="flex gap-4 rounded-card bg-white p-6 shadow-soft ring-1 ring-ice-100">
                         <x-dynamic-component :component="$benefit['icon']" class="size-7 shrink-0 text-royal-600" aria-hidden="true" />

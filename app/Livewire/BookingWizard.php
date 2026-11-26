@@ -21,7 +21,6 @@ use App\Services\Availability\AvailabilityService;
 use App\Services\Coverage\CoverageService;
 use App\Services\Pricing\PricingService;
 use App\Settings\BookingSettings;
-use App\Support\Money;
 use App\Support\Postcode;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -31,6 +30,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Session;
 use Livewire\Component;
 use Propaganistas\LaravelPhone\Rules\Phone as PhoneRule;
 
@@ -47,7 +47,7 @@ use Propaganistas\LaravelPhone\Rules\Phone as PhoneRule;
  * @property-read DeviceModel|null $selectedModel
  * @property-read SupportCollection<int, Collection<int, RepairPrice>> $prices
  * @property-read list<CollectionSlot> $collectionSlots
- * @property-read list<array{label: string, quality: string|null, price: string, warranty: string|null}> $summaryLines
+ * @property-read list<array{label: string, quality: string|null}> $summaryLines
  */
 class BookingWizard extends Component
 {
@@ -59,96 +59,138 @@ class BookingWizard extends Component
     public const array STEP_LABELS = [1 => 'Postcode', 2 => 'Device', 3 => 'Repair', 4 => 'Collection', 5 => 'Your details', 6 => 'Confirm'];
 
     #[Locked]
+    #[Session]
     public int $step = 1;
 
     /** Highest step reached, so customers can jump back but not skip ahead. */
     #[Locked]
+    #[Session]
     public int $furthestStep = 1;
 
     // Step 1: postcode.
+    #[Session]
     public string $postcode = '';
 
     #[Locked]
+    #[Session]
     public ?int $serviceAreaId = null;
 
     #[Locked]
+    #[Session]
     public ?string $areaName = null;
 
     #[Locked]
+    #[Session]
     public int $collectionFeePence = 0;
 
     #[Locked]
+    #[Session]
     public bool $outOfArea = false;
 
     // Out of area: request a call back or post-in repair.
+    #[Session]
     public string $outOfAreaName = '';
 
+    #[Session]
     public string $outOfAreaPhone = '';
 
+    #[Session]
     public string $outOfAreaEmail = '';
 
+    #[Session]
     public string $outOfAreaMessage = '';
 
     #[Locked]
+    #[Session]
     public ?string $outOfAreaReference = null;
 
     // Step 2: device.
+    #[Session]
     public string $model = '';
 
+    #[Session]
     public string $colour = '';
 
+    #[Session]
     public string $storage = '';
 
     // Step 3: repairs (repair type ids) and the part quality chosen for each.
 
     /** @var list<string> */
+    #[Session]
     public array $selectedRepairs = [];
 
     /** @var array<int|string, string> repair type id => part quality id ('' for none) */
+    #[Session]
     public array $qualities = [];
 
     // Step 4: collection.
+    #[Session]
     public string $slot = '';
 
+    #[Session]
+    public string $selectedDate = '';
+
+    #[Session]
     public string $returnTo = 'same';
 
+    #[Session]
     public string $returnLine1 = '';
 
+    #[Session]
     public string $returnLine2 = '';
 
+    #[Session]
     public string $returnTown = '';
 
+    #[Session]
     public string $returnPostcode = '';
 
     // Step 5: details.
+    #[Session]
     public string $firstName = '';
 
+    #[Session]
     public string $lastName = '';
 
+    #[Session]
     public string $phone = '';
 
+    #[Session]
     public string $email = '';
 
+    #[Session]
     public string $line1 = '';
 
+    #[Session]
     public string $line2 = '';
 
+    #[Session]
     public string $town = '';
 
+    #[Session]
     public string $notes = '';
 
+    #[Session]
     public bool $acceptTerms = false;
 
+    #[Session]
     public bool $startStraightAway = false;
 
+    #[Session]
     public bool $marketingConsent = false;
 
     /** The lead saved while the customer fills in the form. */
     #[Locked]
+    #[Session]
     public ?int $leadId = null;
 
     public function mount(): void
     {
+        if ($this->postcode !== '' || $this->model !== '' || $this->step > 1) {
+            return;
+        }
+
         $request = request();
         $postcode = $request->string('postcode')->trim()->toString();
         $modelSlug = $request->string('model')->toString();
@@ -364,6 +406,47 @@ class BookingWizard extends Component
         $this->advanceTo(4);
     }
 
+    public function chooseCollectionDate(string $date): void
+    {
+        $dateHasAvailableSlots = collect($this->collectionSlots)
+            ->contains(fn (CollectionSlot $slot): bool => $slot->date->toDateString() === $date);
+
+        if (! $dateHasAvailableSlots) {
+            return;
+        }
+
+        $this->selectedDate = $date;
+
+        if ($this->slot !== '' && ! str_starts_with($this->slot, $date.':')) {
+            $this->slot = '';
+        }
+
+        $this->resetErrorBag('slot');
+    }
+
+    public function updatedSlot(string $slotKey): void
+    {
+        if ($slotKey === '') {
+            $this->selectedDate = '';
+
+            return;
+        }
+
+        $slot = app(AvailabilityService::class)->findSlot($slotKey);
+
+        if ($slot === null) {
+            $this->slot = '';
+            $this->addError('slot', 'Sorry, that time is no longer available. Please choose another.');
+            unset($this->collectionSlots);
+
+            return;
+        }
+
+        $this->slot = $slotKey;
+        $this->selectedDate = $slot->date->toDateString();
+        $this->resetErrorBag('slot');
+    }
+
     /**
      * Step 4: collection slot and where to return the phone.
      */
@@ -514,6 +597,14 @@ class BookingWizard extends Component
             return;
         }
 
+        $this->reset(
+            'step', 'furthestStep', 'postcode', 'serviceAreaId', 'areaName', 'collectionFeePence', 'outOfArea',
+            'outOfAreaName', 'outOfAreaPhone', 'outOfAreaEmail', 'outOfAreaMessage', 'outOfAreaReference',
+            'model', 'colour', 'storage', 'selectedRepairs', 'qualities', 'slot', 'selectedDate', 'returnTo',
+            'returnLine1', 'returnLine2', 'returnTown', 'returnPostcode', 'firstName', 'lastName', 'phone', 'email',
+            'line1', 'line2', 'town', 'notes', 'acceptTerms', 'startStraightAway', 'marketingConsent', 'leadId',
+        );
+
         $this->redirect(URL::signedRoute('booking.thanks', ['ref' => $job->reference]));
     }
 
@@ -571,7 +662,7 @@ class BookingWizard extends Component
     }
 
     /**
-     * @return list<array{label: string, quality: string|null, price: string, warranty: string|null}>
+     * @return list<array{label: string, quality: string|null}>
      */
     #[Computed]
     public function summaryLines(): array
@@ -579,8 +670,6 @@ class BookingWizard extends Component
         return $this->chosenPrices()->map(fn (RepairPrice $price): array => [
             'label' => $price->repairType->name,
             'quality' => $price->partQuality?->name,
-            'price' => $price->formattedPrice(),
-            'warranty' => $price->warrantyLabel(),
         ])->values()->all();
     }
 
@@ -592,18 +681,14 @@ class BookingWizard extends Component
     public function render(BookingSettings $settings): View
     {
         $slot = $this->slot !== '' ? collect($this->collectionSlots)->first(fn (CollectionSlot $candidate): bool => $candidate->key() === $this->slot) : null;
-        $repairsTotal = $this->repairsTotalPence();
 
         return view('livewire.booking-wizard', [
             'stepLabels' => self::STEP_LABELS,
-            'diagnostics' => $this->diagnosticsPrice(),
+            'hasDiagnostics' => $this->diagnosticsPrice() !== null,
             'slotsByDate' => collect($this->collectionSlots)->groupBy(fn (CollectionSlot $candidate): string => $candidate->date->toDateString()),
             'chosenSlot' => $slot,
-            'repairsTotal' => Money::format($repairsTotal),
-            'collectionFee' => $this->collectionFeePence > 0 ? Money::format($this->collectionFeePence) : 'Free',
-            'estimatedTotal' => Money::format($repairsTotal + $this->collectionFeePence),
-            'settings' => $settings,
             'popularModels' => $this->models->where('is_popular', true)->take(8),
+            'settings' => $settings,
         ]);
     }
 

@@ -12,7 +12,7 @@
             <p class="mt-2 max-w-xl leading-relaxed text-sky-100">{{ $data['text'] }}</p>
         @endif
         <x-ui.button :href="$url" variant="light" size="lg" class="mt-5">
-            {{ filled($data['button_label'] ?? null) ? $data['button_label'] : 'Book this repair' }}
+            Book this repair
             <x-heroicon-m-arrow-right class="size-5" aria-hidden="true" />
         </x-ui.button>
     </div>

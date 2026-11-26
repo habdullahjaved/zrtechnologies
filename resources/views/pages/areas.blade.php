@@ -41,7 +41,7 @@
                                 </div>
                                 <div class="flex gap-1.5">
                                     <dt class="font-semibold text-navy-900">Collection &amp; return:</dt>
-                                    <dd>{{ $area->collectionFeeLabel() }}</dd>
+                                    <dd>Confirmed when we discuss your repair request</dd>
                                 </div>
                                 @if ($area->typical_collection_times)
                                     <div>

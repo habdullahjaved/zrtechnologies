@@ -6,11 +6,11 @@
     <x-ui.section tone="ice" spacing="tight">
         <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
             <x-ui.card
-                x-data="{ tab: new URLSearchParams(location.search).get('form') || 'contact' }"
+                x-data="{ tab: new URLSearchParams(location.search).get('form') || (new URLSearchParams(location.search).has('model') || new URLSearchParams(location.search).has('repair') ? 'quote' : 'contact') }"
                 padding="p-5 sm:p-8"
             >
                 <div role="tablist" aria-label="How would you like us to help?" class="flex flex-wrap gap-2">
-                    @foreach (['contact' => 'Send a message', 'callback' => 'Request a callback', 'quote' => 'Get a quote'] as $key => $label)
+                    @foreach (['contact' => 'Send a message', 'callback' => 'Request a callback', 'quote' => 'Request repair details'] as $key => $label)
                         <button
                             type="button"
                             role="tab"
@@ -36,7 +36,7 @@
                 </div>
                 <div id="panel-quote" role="tabpanel" aria-labelledby="tab-quote" x-show="tab === 'quote'" x-cloak class="mt-6">
                     <h2 class="text-2xl font-bold">Get a quote</h2>
-                    <p class="mt-1.5 mb-6">Can’t see your repair on our price list? Tell us about it and we will send you a price.</p>
+                    <p class="mt-1.5 mb-6">Tell us your iPhone model, the service you need and your postcode. We’ll call you with the repair details and full cost.</p>
                     <livewire:enquiry-form type="quote" />
                 </div>
             </x-ui.card>

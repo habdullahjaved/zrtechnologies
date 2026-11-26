@@ -15,7 +15,7 @@
                             <p class="mt-2 leading-relaxed">{{ $video->service->summary }}</p>
                         @endif
                         <x-ui.button :href="$video->service->url()" variant="secondary" class="mt-4">
-                            Prices and booking
+                            Book a Repair
                             <x-heroicon-m-arrow-right class="size-4" aria-hidden="true" />
                         </x-ui.button>
                     </x-ui.card>

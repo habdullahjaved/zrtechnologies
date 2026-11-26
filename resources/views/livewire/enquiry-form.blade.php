@@ -6,11 +6,11 @@
                 <p class="text-lg font-bold text-navy-900">
                     @switch ($type)
                         @case('callback') Thanks, we will call you back. @break
-                        @case('quote') Thanks, we will send your quote shortly. @break
+                        @case('quote') Thanks, we will call you with the details. @break
                         @default Thanks, we have your message.
                     @endswitch
                 </p>
-                <p class="mt-1">Your reference is <strong>{{ $reference }}</strong>. We usually reply within a few hours, day or night.</p>
+                <p class="mt-1">Your reference is <strong>{{ $reference }}</strong>. We’ll be in touch shortly to discuss your repair.</p>
                 <button type="button" wire:click="sendAnother" class="mt-3 text-sm font-semibold text-royal-600 hover:underline">Send another message</button>
             </div>
         </div>
@@ -32,8 +32,8 @@
                 <x-form.input name="phone" :id="$idPrefix.'-phone'" label="Phone number" type="tel" wire:model="phone" autocomplete="tel" inputmode="tel" required />
                 <x-form.select name="callbackTime" :id="$idPrefix.'-time'" label="Best time to call" :options="$callbackTimes" wire:model="callbackTime" class="sm:col-span-2" />
             @else
-                <x-form.input name="email" :id="$idPrefix.'-email'" label="Email" type="email" wire:model="email" autocomplete="email" :required="$type !== 'quote'" />
-                <x-form.input name="phone" :id="$idPrefix.'-phone'" label="Phone number" type="tel" wire:model="phone" autocomplete="tel" inputmode="tel" :optional="$type !== 'quote'" />
+                <x-form.input name="email" :id="$idPrefix.'-email'" label="Email" type="email" wire:model="email" autocomplete="email" :required="$type !== 'quote'" :optional="$type === 'quote'" />
+                <x-form.input name="phone" :id="$idPrefix.'-phone'" label="Phone number" type="tel" wire:model="phone" autocomplete="tel" inputmode="tel" :required="$type === 'quote'" :optional="$type !== 'quote'" />
             @endif
 
             @if ($type === 'quote')
@@ -49,12 +49,13 @@
                 <x-form.select
                     name="repair"
                     :id="$idPrefix.'-repair'"
-                    label="Repair"
+                    label="Service"
                     :options="$this->repairTypes->pluck('name', 'slug')->all()"
-                    placeholder="Not sure"
+                    placeholder="Choose a service"
                     wire:model="repair"
+                    required
                 />
-                <x-form.input name="postcode" :id="$idPrefix.'-postcode'" label="Postcode" wire:model="postcode" autocomplete="postal-code" autocapitalize="characters" maxlength="10" optional />
+                <x-form.input name="postcode" :id="$idPrefix.'-postcode'" label="Postcode" wire:model="postcode" autocomplete="postal-code" autocapitalize="characters" maxlength="10" required />
             @endif
 
             @if ($type === 'business')
@@ -68,8 +69,8 @@
                 wire:model="message"
                 rows="4"
                 class="sm:col-span-2"
-                :required="in_array($type, ['contact', 'business'], true)"
-                :optional="in_array($type, ['quote', 'callback'], true)"
+                :required="in_array($type, ['contact', 'business', 'quote'], true)"
+                :optional="$type === 'callback'"
             />
 
             @if ($type !== 'callback')

@@ -39,7 +39,7 @@ class SitemapBuilder
      * @var list<SystemPage>
      */
     private const array TEMPLATE_PAGES = [
-        SystemPage::Home, SystemPage::IphoneRepair, SystemPage::Prices, SystemPage::HowItWorks,
+        SystemPage::Home, SystemPage::IphoneRepair, SystemPage::HowItWorks,
         SystemPage::Areas, SystemPage::Booking, SystemPage::Faqs, SystemPage::Reviews,
         SystemPage::Contact, SystemPage::Business, SystemPage::Blog, SystemPage::Videos,
     ];

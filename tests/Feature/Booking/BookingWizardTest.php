@@ -91,8 +91,8 @@ function bookingAtReview(): Testable
 
 it('books a repair end to end: customer, lead, job, prices and emails', function () {
     $wizard = bookingAtReview()
-        ->assertSee('Estimated total')
-        ->assertSee('£223'); // 149 + 69 + 5 collection
+        ->assertDontSee('Estimated total')
+        ->assertDontSee('£223');
 
     $this->travel(10)->seconds();
     $wizard->call('confirm')->assertHasNoErrors();
@@ -123,6 +123,51 @@ it('books a repair end to end: customer, lead, job, prices and emails', function
 
     Notification::assertSentTo($job->customer, BookingConfirmed::class);
     Notification::assertSentTo(new AnonymousNotifiable, StaffAlert::class);
+});
+
+it('keeps the chosen collection day and time visibly selected', function () {
+    $wizard = Livewire::test(BookingWizard::class)
+        ->set('postcode', 'BB2 4NY')->call('checkPostcode')
+        ->call('chooseModel', 'iphone-15')->call('submitDevice')
+        ->set('selectedRepairs', [(string) $this->battery->id])->call('submitRepairs')
+        ->call('chooseCollectionDate', '2026-11-30')
+        ->set('slot', $this->slotKey)
+        ->assertSet('selectedDate', '2026-11-30')
+        ->assertSet('slot', $this->slotKey)
+        ->assertSeeHtml('wire:model.live="slot"')
+        ->assertSeeHtml('border-royal-600 bg-ice-50 shadow-soft')
+        ->call('submitCollection')
+        ->assertSet('step', 5)
+        ->assertHasNoErrors();
+
+    expect($wizard->get('step'))->toBe(5);
+});
+
+it('restores booking choices and entered details after a refresh', function () {
+    $this->withSession([]);
+
+    Livewire::test(BookingWizard::class)
+        ->set('postcode', 'BB2 4NY')->call('checkPostcode')
+        ->call('chooseModel', 'iphone-15')->call('submitDevice')
+        ->set('selectedRepairs', [(string) $this->battery->id])->call('submitRepairs')
+        ->set('slot', $this->slotKey)->call('submitCollection')
+        ->set('firstName', 'Sarah')
+        ->set('phone', '07912 345678')
+        ->set('email', 'sarah@example.com')
+        ->set('line1', '12 King Street')
+        ->set('town', 'Blackburn');
+
+    Livewire::test(BookingWizard::class)
+        ->assertSet('step', 5)
+        ->assertSet('postcode', 'BB2 4NY')
+        ->assertSet('model', 'iphone-15')
+        ->assertSet('selectedRepairs', [(string) $this->battery->id])
+        ->assertSet('slot', $this->slotKey)
+        ->assertSet('firstName', 'Sarah')
+        ->assertSet('phone', '07912 345678')
+        ->assertSet('email', 'sarah@example.com')
+        ->assertSet('line1', '12 King Street')
+        ->assertSet('town', 'Blackburn');
 });
 
 it('keeps the booking as a lead once a mobile number is given, then completes the same lead', function () {

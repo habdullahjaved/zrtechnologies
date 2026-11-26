@@ -9,10 +9,8 @@ use App\Settings\BusinessSettings;
 use Illuminate\Support\Facades\Route;
 
 /**
- * Where "Book a Repair" buttons point. Once the online booking wizard exists
- * (route "booking.create") they go there, prefilled with any model, repair or
- * postcode already chosen; until then they open WhatsApp with a prefilled
- * booking message, so the button always works.
+ * Where repair booking buttons point. They open the booking wizard prefilled
+ * with any model, repair or postcode already chosen.
  */
 final class BookingCallToAction
 {

@@ -24,7 +24,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * The home page, in the order set out in the brief: hero, price checker, how
+ * The home page, in the order set out in the brief: hero, booking wizard, how
  * it works, popular repairs, why us, videos, areas, reviews, latest guides,
  * FAQs, the call-to-action band and the "coming soon" teaser.
  */
@@ -52,10 +52,8 @@ class HomeController extends Controller
                 'name' => $service->name,
                 'summary' => $service->summary,
                 'icon' => $service->icon,
-                'from_pence' => $directory->fromPrice($service),
                 'url' => $service->url(),
             ])
-            ->filter(fn (array $item): bool => $item['from_pence'] !== null)
             ->values()
             ->all();
 
@@ -66,8 +64,7 @@ class HomeController extends Controller
                     'name' => $item['repair']->name,
                     'summary' => $item['repair']->summary,
                     'icon' => $item['repair']->icon,
-                    'from_pence' => $item['from_pence'],
-                    'url' => route('prices'),
+                    'url' => route('booking.create', ['repair' => $item['repair']->slug]),
                 ])
                 ->values()
                 ->all();

@@ -1,10 +1,9 @@
-{{-- A repair card linking to its service page, with the "from" price. --}}
+{{-- A repair card linking to its service page. --}}
 @props([
     'name',
     'url',
     'summary' => null,
     'icon' => null,
-    'fromPence' => null,
     'headingLevel' => 3,
 ])
 
@@ -20,13 +19,7 @@
     @if ($summary)
         <p class="mt-2 flex-1 leading-relaxed">{{ $summary }}</p>
     @endif
-    <p class="mt-5 flex items-center justify-between gap-3">
-        @if ($fromPence !== null)
-            <span class="flex items-baseline gap-1.5">
-                <span class="text-sm">from</span>
-                <span class="font-heading text-2xl font-extrabold text-navy-900">{{ \App\Support\Money::format($fromPence) }}</span>
-            </span>
-        @endif
+    <p class="mt-5 flex items-center justify-end gap-3">
         <x-heroicon-m-arrow-right class="size-5 text-royal-600 transition motion-safe:group-hover:translate-x-1" aria-hidden="true" />
     </p>
 </x-ui.card>

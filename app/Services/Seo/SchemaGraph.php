@@ -86,7 +86,6 @@ class SchemaGraph
             'image' => asset($this->site->default_og_image),
             'telephone' => Phone::toE164($this->business->phone),
             'email' => $this->business->email,
-            'priceRange' => $this->business->price_range,
             'currenciesAccepted' => 'GBP',
             'address' => $this->address(),
             'areaServed' => $this->areaServed(),

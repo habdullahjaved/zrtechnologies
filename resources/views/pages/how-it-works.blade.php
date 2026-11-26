@@ -10,7 +10,7 @@
                     'icon' => 'heroicon-o-calendar-days',
                     'title' => 'Book online',
                     'time' => 'About 2 minutes',
-                    'text' => 'Enter your postcode to check we collect from you, choose your iPhone model and the repair, then pick a collection window. You see the price before you book and there is nothing to pay today.',
+                    'text' => 'Enter your postcode, choose your iPhone model and repair, then pick a collection window that suits you.',
                 ],
                 [
                     'icon' => 'heroicon-o-truck',
@@ -22,7 +22,7 @@
                     'icon' => 'heroicon-o-magnifying-glass',
                     'title' => 'Diagnosis',
                     'time' => 'Usually the same day',
-                    'text' => 'We test every function before we start, so nothing is missed. If we find something that changes the price, we stop and ask you first. We never carry on without your go-ahead.',
+                    'text' => 'We test every function before we start, so nothing is missed. If we find anything unexpected, we stop and discuss it with you before continuing.',
                 ],
                 [
                     'icon' => 'heroicon-o-wrench-screwdriver',
@@ -34,7 +34,7 @@
                     'icon' => 'heroicon-o-hand-thumb-up',
                     'title' => 'We bring it back',
                     'time' => 'Often the same or next working day',
-                    'text' => 'We return your iPhone to your door at a time that suits you. You pay when it is back in your hand, and the repair is covered by our warranty.',
+                    'text' => 'We return your iPhone to your door at a time that suits you. The repair is covered by our warranty.',
                 ],
             ] as $step)
                 <li class="relative flex gap-5 sm:gap-7">

@@ -47,7 +47,7 @@
                             <p class="font-heading text-xl font-extrabold sm:text-2xl">Need iPhone {{ \Illuminate\Support\Str::lower($post->service->name) }}?</p>
                             <p class="mt-2 max-w-xl leading-relaxed text-sky-100">{{ $post->service->summary }}</p>
                             <x-ui.button :href="$post->service->url()" variant="light" size="lg" class="mt-5">
-                                See prices and book
+                                Book a Repair
                                 <x-heroicon-m-arrow-right class="size-5" aria-hidden="true" />
                             </x-ui.button>
                         </div>

@@ -6,7 +6,6 @@
                 <x-heroicon-s-wrench-screwdriver class="size-5" aria-hidden="true" />
                 Book a Repair
             </x-ui.button>
-            <x-ui.button :href="route('prices')" variant="outline-light" size="lg">See all prices</x-ui.button>
         </div>
     </x-site.page-header>
 
@@ -17,9 +16,9 @@
             </x-ui.section-heading>
 
             <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($services as ['service' => $service, 'from_pence' => $fromPence])
+                @foreach ($services as ['service' => $service])
                     <li>
-                        <x-site.service-card :name="$service->name" :url="$service->url()" :summary="$service->summary" :icon="$service->icon" :from-pence="$fromPence" />
+                        <x-site.service-card :name="$service->name" :url="$service->url()" :summary="$service->summary" :icon="$service->icon" />
                     </li>
                 @endforeach
             </ul>
@@ -43,7 +42,7 @@
     @if ($modelFamilies->isNotEmpty())
         <x-ui.section tone="ice">
             <x-ui.section-heading eyebrow="Repairs by model" title="Find your iPhone">
-                Every model from the iPhone 8 to the latest line-up, with prices for each repair.
+                Every model from the iPhone 8 to the latest line-up. Choose yours to see repairs and book.
             </x-ui.section-heading>
 
             @if ($popularModels->isNotEmpty())

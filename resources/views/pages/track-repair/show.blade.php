@@ -44,7 +44,6 @@
                     @if ($job->collectionSlotLabel())
                         <div><dt class="font-semibold text-navy-900">Collection</dt><dd class="mt-0.5">{{ $job->collectionSlotLabel() }}</dd></div>
                     @endif
-                    <div><dt class="font-semibold text-navy-900">Estimated total</dt><dd class="mt-0.5">{{ $job->final_price_pence !== null ? \App\Support\Money::format($job->final_price_pence) : $job->estimatedTotalLabel() }}</dd></div>
                     @if ($job->warranty_expires_at)
                         <div><dt class="font-semibold text-navy-900">Warranty until</dt><dd class="mt-0.5">{{ $job->warranty_expires_at->format('j F Y') }}</dd></div>
                     @endif

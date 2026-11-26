@@ -60,6 +60,12 @@ class PageCache
             return null;
         }
 
+        if (str_contains($cached['content'], 'wire:snapshot')) {
+            $this->store()->forget($key);
+
+            return null;
+        }
+
         $content = str_replace(self::TOKEN_PLACEHOLDER, $csrfToken, $cached['content']);
         $content = str_replace(self::NONCE_PLACEHOLDER, (string) Vite::cspNonce(), $content);
 
@@ -72,6 +78,10 @@ class PageCache
     public function put(string $key, Response $response, string $csrfToken): void
     {
         $content = (string) $response->getContent();
+
+        if (str_contains($content, 'wire:snapshot')) {
+            return;
+        }
 
         // Each visitor gets their own Content-Security-Policy nonce.
         if (filled($nonce = Vite::cspNonce())) {

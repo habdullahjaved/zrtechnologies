@@ -66,9 +66,6 @@
                                                             @endif
                                                             <span>
                                                                 <span class="block font-semibold text-navy-900">{{ $service['label'] }}</span>
-                                                                @if ($service['from'])
-                                                                    <span class="block text-sm">from {{ $service['from'] }}</span>
-                                                                @endif
                                                             </span>
                                                         </a>
                                                     </li>
@@ -89,11 +86,6 @@
                                                     <li><a href="{{ $model['url'] }}" class="font-medium text-navy-900 hover:text-royal-600">{{ $model['label'] }}</a></li>
                                                 @endforeach
                                             </ul>
-                                        @endif
-                                        @if ($megaMenu['prices_url'])
-                                            <x-ui.button :href="$megaMenu['prices_url']" variant="secondary" size="md" class="mt-6 w-full">
-                                                See all repair prices
-                                            </x-ui.button>
                                         @endif
                                     </div>
                                 </div>
@@ -181,9 +173,6 @@
                                         <li>
                                             <a href="{{ $service['url'] }}" @click="close()" class="flex items-center justify-between rounded-lg px-3 py-2.5 font-semibold text-navy-900 hover:bg-ice-50">
                                                 {{ $service['label'] }}
-                                                @if ($service['from'])
-                                                    <span class="text-sm font-normal text-ink">from {{ $service['from'] }}</span>
-                                                @endif
                                             </a>
                                         </li>
                                     @endforeach

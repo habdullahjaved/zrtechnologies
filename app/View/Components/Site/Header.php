@@ -30,7 +30,7 @@ class Header extends Component
     /** @var list<array{label: string, url: string, active: bool, external: bool}> */
     public array $links;
 
-    /** @var array{url: string, active: bool, services: list<array{label: string, url: string, icon: string|null, from: string|null}>, models: list<array{label: string, url: string}>, prices_url: string|null}|null */
+    /** @var array{url: string, active: bool, services: list<array{label: string, url: string, icon: string|null}>, models: list<array{label: string, url: string}>}|null */
     public ?array $megaMenu;
 
     public ?string $announcement;

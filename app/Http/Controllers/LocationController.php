@@ -7,7 +7,6 @@ use App\Models\Review;
 use App\Models\Service;
 use App\Models\ServiceArea;
 use App\Services\Content\ServiceDirectory;
-use App\Services\Pricing\PricingService;
 use App\Services\Seo\SchemaGraph;
 use App\Services\Seo\SeoResolver;
 use App\Settings\SiteSettings;
@@ -27,7 +26,6 @@ class LocationController extends Controller
     public function __invoke(
         string $slug,
         ServiceDirectory $directory,
-        PricingService $pricing,
         SeoResolver $seo,
         SchemaGraph $schema,
         BlockRenderer $renderer,
@@ -51,7 +49,7 @@ class LocationController extends Controller
         $reviews = $localReviews->isNotEmpty() ? $localReviews : Review::query()->displayable()->limit(3)->get();
 
         $seoData = $seo->make(
-            meta: $area->seoMeta,
+            meta: null,
             title: $seo->pattern($site->title_pattern_location, ['town' => $area->town]),
             description: "iPhone repair in {$area->town} with collection and delivery. We collect from your door in ".implode(', ', $area->postcode_districts).', repair your iPhone and bring it back.',
             image: 'images/og/og-areas-we-cover.jpg',
@@ -60,7 +58,7 @@ class LocationController extends Controller
             canonical: $passes ? $canonical : route('areas.index'),
             breadcrumbs: $breadcrumbs,
             schema: [
-                $schema->serviceNode("iPhone Repair in {$area->town}", "iPhone repair with collection and delivery in {$area->town}.", $canonical, $pricing->fromPrices()),
+                $schema->serviceNode("iPhone Repair in {$area->town}", "iPhone repair with collection and delivery in {$area->town}.", $canonical, []),
                 $schema->faqNode($faqs, $canonical),
             ],
         );
@@ -70,7 +68,7 @@ class LocationController extends Controller
             'area' => $area,
             'content' => $renderer->render($area->blocks),
             'breadcrumbs' => $breadcrumbs,
-            'services' => $directory->services()->map(fn (Service $service): array => ['service' => $service, 'from_pence' => $directory->fromPrice($service)]),
+            'services' => $directory->services()->map(fn (Service $service): array => ['service' => $service]),
             'reviews' => $reviews,
             'faqs' => $faqs,
             'otherAreas' => ServiceArea::query()->listed()->whereKeyNot($area->getKey())->get(),
